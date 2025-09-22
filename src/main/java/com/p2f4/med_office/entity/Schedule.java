@@ -1,7 +1,5 @@
 package com.p2f4.med_office.entity;
 
-import com.p2f4.med_office.entity.MedicalOffice;
-
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -26,7 +24,7 @@ public class Schedule {
     private String type;
 
     @Column(name = "id_office", nullable = false)
-    private Long idOffice;
+    private Integer idOffice;
 
     @Column(name = "start_date", nullable = false)
     private LocalDateTime startDate;
