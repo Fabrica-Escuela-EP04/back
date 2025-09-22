@@ -1,5 +1,11 @@
 package com.p2f4.med_office.domain;
 
-public interface MedicalOfficeRepository {
+import com.p2f4.med_office.entity.MedicalOffice;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
+@Repository
+public interface MedicalOfficeRepository extends JpaRepository<MedicalOffice, Integer> {
+
+    
 }
