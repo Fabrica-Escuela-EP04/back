@@ -2,8 +2,9 @@ package com.p2f4.med_office.entity;
 
 import lombok.Data;
 import jakarta.persistence.*;
+import java.util.Set;
 
-@Table(name = "user_")
+@Table(name = "user")
 @Entity
 @Data
 
@@ -35,7 +36,7 @@ public class User {
     private String phoneNumber;
 
     @Column(name = "id_role")
-    private Integer idRole;
+    private Short idRole;
 
     /*
      * RELATIONSHIPS
@@ -43,5 +44,13 @@ public class User {
     @ManyToOne
     @JoinColumn(name = "id_role", insertable = false, updatable = false)
     private UserRole userRole;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "doctor_specialty", 
+        joinColumns = @JoinColumn(name ="id_user"),
+        inverseJoinColumns = @JoinColumn(name = "id_specialty")
+    )
+    private Set<Specialty> specialties;
 
 }

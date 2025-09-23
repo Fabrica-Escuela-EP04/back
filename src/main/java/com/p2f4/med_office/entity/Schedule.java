@@ -18,7 +18,7 @@ public class Schedule {
     private Long idSchedule;
 
     @Column(name = "id_user", nullable = false)
-    private Long idUser;
+    private Integer idUser;
 
     @Column(name = "type", nullable = false)
     private String type;
@@ -34,10 +34,9 @@ public class Schedule {
 
     // Relations
 
-    /*
     @ManyToOne
     @JoinColumn(name ="id_user", insertable = false, updatable = false)
-    private User user; */
+    private User user;
 
     @ManyToOne
     @JoinColumn(name = "id_office", insertable = false, updatable = false)
