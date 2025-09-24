@@ -6,7 +6,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 
-@Table(name = "user_role")
+@Table(name = "user_roles")
 @Entity
 @Data
 

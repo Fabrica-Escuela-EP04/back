@@ -1,11 +1,13 @@
 package com.p2f4.med_office.entity;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import jakarta.persistence.*;
 
-@Table (name = "clinic")
+@Table (name = "clinics")
 @Entity
-@Data
+@Getter
+@Setter
 public class Clinic {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,5 +29,13 @@ public class Clinic {
     @Column(name = "status", nullable = false)
     private String status;
 
-
+    public Clinic() {
+    }
+    public Clinic(String name, String type, String location, String phoneNumber, String status) {
+        this.name = name;
+        this.type = type;
+        this.location = location;
+        this.phoneNumber = phoneNumber;
+        this.status = status;
+    }
 }
