@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface MedicalOfficeRepository extends JpaRepository<MedicalOffice, Integer> {
-
-    
+    // Custom query to check for unique office number within a clinic
+  boolean existsByIdClinicAndOfficeNumber(Integer idClinic, Integer officeNumber);
 }
+
