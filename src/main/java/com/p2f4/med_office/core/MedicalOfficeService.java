@@ -7,7 +7,13 @@ import com.p2f4.med_office.domain.MedicalOfficeRepository;
 import com.p2f4.med_office.domain.SpecialtyRepository;
 import com.p2f4.med_office.dto.MedicalOfficeDTO;
 import com.p2f4.med_office.entity.Clinic;
+import com.p2f4.med_office.entity.Specialty;
 import com.p2f4.med_office.mapper.MedicalOfficeMapper;
+import com.p2f4.med_office.utils.ClinicInactiveException;
+import com.p2f4.med_office.utils.ClinicNotFoundException;
+import com.p2f4.med_office.utils.OfficeNumberDuplicateException;
+import com.p2f4.med_office.utils.SpecialtyNotFoundException;
+
 import jakarta.transaction.Transactional;
 
 @Service
@@ -33,19 +39,14 @@ public class MedicalOfficeService {
 
     public MedicalOfficeDTO createMedicalOffice(Integer officeNumber, Integer idClinic, Integer idSpecialty, String status) {
         // Validate clinic and specialty existence and status
-        Clinic clinic = clinicRepository.findById(idClinic)
-                .orElseThrow(() -> new IllegalArgumentException("Clinic not found"));
-        specialtyRepository.findById(idSpecialty).orElseThrow(() -> new IllegalArgumentException("Specialty not found"));
-        if (!"ACTIVE".equals(clinic.getStatus())) {
-            throw new IllegalArgumentException("Clinic is not active");
+        Clinic clinic = clinicRepository.findById(idClinic).orElseThrow(ClinicNotFoundException::new);
+        Specialty specialty = specialtyRepository.findById(idSpecialty).orElseThrow(SpecialtyNotFoundException::new);
+        if (!"ACTIVE".equalsIgnoreCase(clinic.getStatus())) {
+            throw new ClinicInactiveException();
         }
         // Check for unique office number within the clinic
         if (medicalOfficeRepository.existsByIdClinicAndOfficeNumber(idClinic, officeNumber)) {
-            throw new IllegalArgumentException("Office number already exists in the clinic");
-        }
-        // Validate required fields
-        if (officeNumber == null || idClinic == null || idSpecialty == null || status == null) {
-            throw new IllegalArgumentException("Missing required fields");
+            throw new OfficeNumberDuplicateException();
         }
         
         MedicalOfficeDTO dto = new MedicalOfficeDTO();
@@ -55,6 +56,8 @@ public class MedicalOfficeService {
         dto.setStatus(status);
 
         var entity = medicalOfficeMapper.toEntity(dto);
+        entity.setClinic(clinic);  
+        entity.setSpecialty(specialty);
         var savedEntity = medicalOfficeRepository.save(entity);
 
         return medicalOfficeMapper.toDTO(savedEntity);
