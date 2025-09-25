@@ -14,7 +14,8 @@ public interface MedicalOfficeMapper {
     MedicalOffice toEntity(MedicalOfficeDTO dto);
 
     // Mapping only the foreign key IDs
-    @Mapping(target = "idClinic", source = "clinic.idClinic")
-    @Mapping(target = "idSpecialty", source = "specialty.idSpecialty")
+   /*  @Mapping(target = "idClinic", source = "clinic.idClinic")
+    @Mapping(target = "idSpecialty", source = "specialty.idSpecialty") 
+    no needed */ 
     MedicalOfficeDTO toDTO(MedicalOffice entity);
 }
