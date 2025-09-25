@@ -1,17 +1,23 @@
 package com.p2f4.med_office.dto;
 
-public class MedicalOfficeDTO {
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 
+public class MedicalOfficeDTO {
+    // Fields
     private Integer idOffice;
-    private Integer idClinic;
-    private Integer idSpecialty;
-    private Integer officeNumber;
-    private String status;
+    @NotNull @Positive private Integer idClinic;
+    @NotNull @Positive private Integer idSpecialty;
+    @NotNull @Positive private Integer officeNumber;
+    @NotBlank private String status;
 
     // Constructors
     public MedicalOfficeDTO() {
     }
-    public MedicalOfficeDTO(Integer idOffice, Integer idClinic, Integer idSpecialty, Integer officeNumber, String status) {
+    public MedicalOfficeDTO(
+        Integer idOffice, Integer idClinic, Integer idSpecialty, Integer officeNumber, String status) {
+            
         this.idOffice = idOffice;
         this.idClinic = idClinic;
         this.idSpecialty = idSpecialty;
