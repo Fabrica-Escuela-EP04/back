@@ -2,7 +2,6 @@ package com.p2f4.med_office.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,7 +13,7 @@ import com.p2f4.med_office.dto.CredentialsDTO;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/api/users")
 public class UserController {
 
     private final UserService userService;
@@ -27,21 +26,21 @@ public class UserController {
     public ResponseEntity<UserDTO> createMedicalOffice(
            @Valid @RequestBody UserDTO request) {
 
-        UserDTO created = userService.createUser(
+        UserDTO newUser = userService.newUser(request.getEmail(), request.getPassword(), request.getIdRole());
+        
+        newUser = userService.createUser(
+                newUser,
                 request.getName(),
                 request.getLastName(),
-                request.getEmail(),
-                request.getPassword(),
                 request.getDocument(),
                 request.getDocumentType(),
-                request.getPhoneNumber(),
-                request.getIdRole()
+                request.getPhoneNumber()
         );
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+        return ResponseEntity.status(HttpStatus.CREATED).body(newUser);
     }
 
-    @GetMapping("/init-session")
+    @PostMapping("/init-session")
     public ResponseEntity<UserDTO> initSession(@Valid @RequestBody CredentialsDTO request){
 
         UserDTO userDTO = userService.validateUser(request.getEmail(), request.getPassword());

@@ -20,7 +20,7 @@ import jakarta.validation.Valid;
 
 
 @RestController
-@RequestMapping("/medical-offices")
+@RequestMapping("/api/medical-offices")
 
 public class MedicalOfficeController {
     

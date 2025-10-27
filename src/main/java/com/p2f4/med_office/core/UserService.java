@@ -13,6 +13,7 @@ import com.p2f4.med_office.utils.Encryption;
 
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.support.ScheduledTaskObservationDocumentation;
 
 @Service
 public class UserService {
@@ -28,8 +29,8 @@ public class UserService {
     }
 
     //Creation of users (For creation only via Postman, no frontEnd in the module)
-    public UserDTO createUser(String name, String lastName, String email, String password, String document, String documentType, String phoneNumber, Short idRole){
-        
+    //Initial step, set up email and password
+    public UserDTO newUser(String email, String password, Short idRole){
         //Not registered users with the same email
         if (userRepository.existsByEmail(email)){
             throw new DuplicatedUserException();
@@ -37,17 +38,30 @@ public class UserService {
         // Validates correct role
         if (!userRoleRepository.existsById(idRole)){
             throw new UserRoleNotFoundException();
-        };
+        }
 
+        UserDTO newUserDTO = new UserDTO();
+        newUserDTO.setEmail(email);
+        newUserDTO.setPassword(Encryption.encryptWord(password));
+        newUserDTO.setIdRole(idRole);
+
+        return newUserDTO;
+
+    }
+
+    // Adding user details and save into the database
+    public UserDTO createUser(UserDTO newUser, String name, String lastName, String document, String documentType, String phoneNumber){
+        
+        
         User user = new User();
         user.setName(name);
         user.setLastName(lastName);
-        user.setEmail(email);
-        user.setPassword(Encryption.encryptWord(password));
+        user.setEmail(newUser.getEmail());
+        user.setPassword(newUser.getPassword());
         user.setDocument(document);
         user.setDocumentType(documentType);
         user.setPhoneNumber(phoneNumber);
-        user.setIdRole(idRole);
+        user.setIdRole(newUser.getIdRole());
 
         var savedEntity = userRepository.save(user);
 
