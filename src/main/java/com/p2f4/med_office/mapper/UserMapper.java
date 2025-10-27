@@ -12,5 +12,7 @@ public interface UserMapper {
     UserDTO toDTO(User user);
 
     @Mapping(target = "specialties", ignore =true)
+    @Mapping(target = "userRole", ignore =true)
     User toEntity(UserDTO userDTO);
+    
 }
