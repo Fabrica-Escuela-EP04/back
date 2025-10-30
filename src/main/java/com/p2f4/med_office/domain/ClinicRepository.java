@@ -9,5 +9,6 @@ import java.util.Optional;
 @Repository
 public interface ClinicRepository extends JpaRepository<Clinic, Integer> {
     //Custom query, find by clinic name
-    public Optional<Clinic> findByName(String clinicName); 
+    public Optional<Clinic> findByName(String clinicName);
+    public Optional<Clinic> findByNameIgnoreCase(String clinicName);
 }
