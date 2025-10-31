@@ -22,18 +22,20 @@ public class MedicalOfficeService {
     private final ClinicRepository clinicRepository;
     private final SpecialtyRepository specialtyRepository;
     private final MedicalOfficeMapper medicalOfficeMapper;
-    
+    private final ScheduleService scheduleService;
 
     public MedicalOfficeService(
         MedicalOfficeRepository medicalOfficeRepository,
         ClinicRepository clinicRepository,
         SpecialtyRepository specialtyRepository,
-        MedicalOfficeMapper medicalOfficeMapper) {
+        MedicalOfficeMapper medicalOfficeMapper,
+        ScheduleService scheduleService){
 
         this.medicalOfficeRepository = medicalOfficeRepository;
         this.clinicRepository = clinicRepository;
         this.medicalOfficeMapper = medicalOfficeMapper;
         this.specialtyRepository = specialtyRepository;
+        this.scheduleService = scheduleService;
     }
     // Creates a medical office using the ids for the specialty and the clinic
     public MedicalOfficeDTO createMedicalOffice(Integer officeNumber, Integer idClinic, Integer idSpecialty, String status) {
@@ -103,8 +105,20 @@ public class MedicalOfficeService {
         // Check clinic status
         if (!"ACTIVE".equalsIgnoreCase(clinic.getStatus())) {throw new ClinicInactiveException();}
 
+
+        if(status.equalsIgnoreCase("MANTENIMIENTO")){
+            scheduleService.createMaintenanceSchedule(
+                null,
+                "MANTENIMIENTO",
+                oldMedicalOffice.getIdOffice(),
+                null,
+                null
+            );
+        }
         // Normalize status
         String normalizedStatus = status == null ? null : status.trim().toUpperCase();
+
+    
         // Check for unique office number within the clinic
         boolean alreadyExists = medicalOfficeRepository.existsByIdClinicAndOfficeNumber(clinic.getIdClinic(), officeNumber);
         boolean changedNumber = oldMedicalOffice.getOfficeNumber() == officeNumber;

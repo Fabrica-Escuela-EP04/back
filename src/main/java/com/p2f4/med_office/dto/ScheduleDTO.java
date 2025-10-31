@@ -4,8 +4,8 @@ import java.time.LocalDateTime;
 
 public class ScheduleDTO {
 
-    private Long idSchedule;
-    private Long idUser;
+    private Integer idSchedule;
+    private Integer idUser;
     private String type;
     private Integer idOffice;
     private LocalDateTime startDate;
@@ -14,7 +14,7 @@ public class ScheduleDTO {
     public ScheduleDTO(){
     }
 
-    public ScheduleDTO(Long idSchedule, Long idUser, String type, Integer idOffice, LocalDateTime startDate,
+    public ScheduleDTO(Integer idSchedule, Integer idUser, String type, Integer idOffice, LocalDateTime startDate,
             LocalDateTime endDate) {
         this.idSchedule = idSchedule;
         this.idUser = idUser;
@@ -24,19 +24,19 @@ public class ScheduleDTO {
         this.endDate = endDate;
     }
 
-    public Long getIdSchedule() {
+    public Integer getIdSchedule() {
         return idSchedule;
     }
 
-    public void setIdSchedule(Long idSchedule) {
+    public void setIdSchedule(Integer idSchedule) {
         this.idSchedule = idSchedule;
     }
 
-    public Long getIdUser() {
+    public Integer getIdUser() {
         return idUser;
     }
 
-    public void setIdUser(Long idUser) {
+    public void setIdUser(Integer idUser) {
         this.idUser = idUser;
     }
 
