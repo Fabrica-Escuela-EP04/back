@@ -2,6 +2,7 @@ package com.p2f4.med_office.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,15 +17,15 @@ import com.p2f4.med_office.dto.ClinicDTO;
 import com.p2f4.med_office.dto.SpecialtyDTO;
 
 import java.util.List;
+
 import jakarta.validation.Valid;
 
+import static com.p2f4.med_office.config.ApiConfiguration.API_BASE_PATH;
 
 @RestController
-@RequestMapping("/api/medical-offices")
-
+@RequestMapping(API_BASE_PATH + "/medical-offices")
 public class MedicalOfficeController {
     
-
     private final MedicalOfficeService medicalOfficeService;
     private final SpecialtyService specialtyService;
     private final ClinicService clinicService;
@@ -37,7 +38,7 @@ public class MedicalOfficeController {
 
     @GetMapping
     public ResponseEntity<MedicalInformationDTO> findClinicsAndSpecialties(){ 
-
+       
         List<ClinicDTO> clinics = clinicService.getAllClinics();
         List<SpecialtyDTO> specialties = specialtyService.getAllSpecialties();
 
@@ -46,9 +47,11 @@ public class MedicalOfficeController {
         medicalInformationDTO.setSpecialties(specialties);
 
         return ResponseEntity.status(HttpStatus.OK).body(medicalInformationDTO);
+        
     }
 
     @PostMapping("/create")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     public ResponseEntity<MedicalOfficeDTO> createMedicalOffice(
            @Valid @RequestBody MedicalOfficeDTO request) {
 
@@ -63,6 +66,7 @@ public class MedicalOfficeController {
     }
 
     @PostMapping("/create-by-name")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     public ResponseEntity<MedicalOfficeDTO> createMedicalOfficeByName(
            @Valid @RequestBody MedicalOfficeParamsDTO request) {
 
