@@ -10,5 +10,5 @@ import java.util.Optional;
 public interface SpecialtyRepository extends JpaRepository<Specialty, Integer> {
     // custom query finding an specialty by its name
     public Optional<Specialty> findBySpecialtyName(String specialtyName);
-    
+    public Optional<Specialty> findBySpecialtyNameIgnoreCase(String specialtyName);
 }

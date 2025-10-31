@@ -12,6 +12,7 @@ import com.p2f4.med_office.entity.Specialty;
 import com.p2f4.med_office.mapper.MedicalOfficeMapper;
 import com.p2f4.med_office.utils.*;
 
+//import jakarta.persistence.criteria.CriteriaBuilder.In;
 import jakarta.transaction.Transactional;
 
 @Service
@@ -34,7 +35,7 @@ public class MedicalOfficeService {
         this.medicalOfficeMapper = medicalOfficeMapper;
         this.specialtyRepository = specialtyRepository;
     }
-
+    // Creates a medical office using the ids for the specialty and the clinic
     public MedicalOfficeDTO createMedicalOffice(Integer officeNumber, Integer idClinic, Integer idSpecialty, String status) {
         // Validate clinic and specialty existence and status
         Clinic clinic = clinicRepository.findById(idClinic).orElseThrow(ClinicNotFoundException::new);
@@ -90,5 +91,33 @@ public class MedicalOfficeService {
 
         return medicalOfficeMapper.toDTO(savedEntity);
     } 
-    
+
+    // Updates a medical office using a office number, the names for the specialty, the name for the clinic and the status
+    public MedicalOfficeDTO updateMedicalOffice(Integer idMedicalOffice, Integer officeNumber, String clinicName, String specialtyName, String status) {
+
+        //Verify medical office, clinic and specialty existence
+        MedicalOffice oldMedicalOffice = medicalOfficeRepository.findById(idMedicalOffice).orElseThrow(MedicalOfficeNotFoundException::new);
+        Clinic clinic = clinicRepository.findByNameIgnoreCase(clinicName).orElseThrow(ClinicNotFoundException::new);
+        System.out.println("Buscando especialidad con nombre: [" + specialtyName + "]");
+        Specialty specialty = specialtyRepository.findBySpecialtyNameIgnoreCase(specialtyName).orElseThrow(SpecialtyNotFoundException::new);
+        // Check clinic status
+        if (!"ACTIVE".equalsIgnoreCase(clinic.getStatus())) {throw new ClinicInactiveException();}
+
+        // Normalize status
+        String normalizedStatus = status == null ? null : status.trim().toUpperCase();
+        // Check for unique office number within the clinic
+        boolean alreadyExists = medicalOfficeRepository.existsByIdClinicAndOfficeNumber(clinic.getIdClinic(), officeNumber);
+        boolean changedNumber = oldMedicalOffice.getOfficeNumber() == officeNumber;
+        if (alreadyExists && !changedNumber) {
+            throw new OfficeNumberDuplicateException();
+        }
+        // Update medical office details
+        oldMedicalOffice.setOfficeNumber(officeNumber);
+        oldMedicalOffice.setIdClinic(clinic.getIdClinic());
+        oldMedicalOffice.setIdSpecialty(specialty.getIdSpecialty());
+        oldMedicalOffice.setStatus(normalizedStatus);
+
+        var updatedEntity = medicalOfficeRepository.save(oldMedicalOffice); 
+        return medicalOfficeMapper.toDTO(updatedEntity);
+    }
 }
