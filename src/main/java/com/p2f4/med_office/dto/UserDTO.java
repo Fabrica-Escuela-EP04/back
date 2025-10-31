@@ -1,11 +1,14 @@
 package com.p2f4.med_office.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class UserDTO {
 
     private Integer idUser;
     private String name;
     private String lastName;
     private String email;
+    @JsonIgnore
     private String password;
     private String document;
     private String documentType;
