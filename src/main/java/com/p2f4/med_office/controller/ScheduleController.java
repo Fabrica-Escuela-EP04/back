@@ -26,7 +26,7 @@ public class ScheduleController {
     public ResponseEntity<ScheduleDTO> createSchedule(
            @Valid @RequestBody ScheduleDTO request) {
 
-        ScheduleDTO created = scheduleService.createSchedule(
+        ScheduleDTO created = scheduleService.createMaintenanceSchedule(
                 request.getIdUser(),
                 request.getType(),
                 request.getIdOffice(),
