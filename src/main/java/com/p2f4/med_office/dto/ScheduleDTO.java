@@ -1,6 +1,6 @@
 package com.p2f4.med_office.dto;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 public class ScheduleDTO {
 
@@ -8,14 +8,14 @@ public class ScheduleDTO {
     private Integer idUser;
     private String type;
     private Integer idOffice;
-    private LocalDateTime startDate;
-    private LocalDateTime endDate;
+    private LocalDate startDate;
+    private LocalDate endDate;
 
     public ScheduleDTO(){
     }
 
-    public ScheduleDTO(Integer idSchedule, Integer idUser, String type, Integer idOffice, LocalDateTime startDate,
-            LocalDateTime endDate) {
+    public ScheduleDTO(Integer idSchedule, Integer idUser, String type, Integer idOffice, LocalDate startDate,
+            LocalDate endDate) {
         this.idSchedule = idSchedule;
         this.idUser = idUser;
         this.type = type;
@@ -56,19 +56,19 @@ public class ScheduleDTO {
         this.idOffice = idOffice;
     }
 
-    public LocalDateTime getStartDate() {
+    public LocalDate getStartDate() {
         return startDate;
     }
 
-    public void setStartDate(LocalDateTime startDate) {
+    public void setStartDate(LocalDate startDate) {
         this.startDate = startDate;
     }
 
-    public LocalDateTime getEndDate() {
+    public LocalDate getEndDate() {
         return endDate;
     }
 
-    public void setEndDate(LocalDateTime endDate) {
+    public void setEndDate(LocalDate endDate) {
         this.endDate = endDate;
     }
 

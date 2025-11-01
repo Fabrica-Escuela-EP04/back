@@ -1,5 +1,5 @@
 package com.p2f4.med_office.core;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 import org.springframework.stereotype.Service;
 
@@ -18,7 +18,7 @@ public class ScheduleService {
         this.scheduleRepository = scheduleRepository;
     } 
     // Creates a maintenance schedule
-    public ScheduleDTO createMaintenanceSchedule(Integer idUser, String type, Integer idOffice, LocalDateTime startDate, LocalDateTime endDate) {
+    public ScheduleDTO createMaintenanceSchedule(Integer idUser, String type, Integer idOffice, LocalDate startDate, LocalDate endDate) {
         // Validation Date not null and startDate before endDate
         if (startDate == null || endDate == null) {
             throw new IllegalArgumentException("Las fechas no pueden ser nulas");

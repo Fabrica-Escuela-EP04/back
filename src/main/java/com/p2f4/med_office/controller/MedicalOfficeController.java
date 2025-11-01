@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.p2f4.med_office.core.*;
 
 import com.p2f4.med_office.dto.MedicalOfficeDTO;
+import com.p2f4.med_office.dto.MedicalOfficeDataUpdatableDTO;
 import com.p2f4.med_office.dto.MedicalOfficeParamsDTO;
 import com.p2f4.med_office.dto.MedicalInformationDTO;
 import com.p2f4.med_office.dto.ClinicDTO;
@@ -52,6 +53,12 @@ public class MedicalOfficeController {
         
     }
 
+   // @GetMapping
+   // public ResponseEntity<List<MedicalOfficeDataUpdatableDTO>> findAllMedicalOffices() {
+   //     List<MedicalOfficeDataUpdatableDTO> medicalOffices = medicalOfficeService.getAllMedicalOffices();
+   //     return ResponseEntity.status(HttpStatus.OK).body(medicalOffices);
+   // }
+    
     @PostMapping("/create")
     @PreAuthorize("hasRole('ADMINISTRADOR')")
     public ResponseEntity<MedicalOfficeDTO> createMedicalOffice(
