@@ -1,18 +1,23 @@
 package com.p2f4.med_office.core;
 
+import java.time.LocalDate;
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.p2f4.med_office.domain.ClinicRepository;
 import com.p2f4.med_office.domain.MedicalOfficeRepository;
 import com.p2f4.med_office.domain.SpecialtyRepository;
 import com.p2f4.med_office.dto.MedicalOfficeDTO;
+import com.p2f4.med_office.dto.MedicalOfficeDataUpdatableDTO;
+import com.p2f4.med_office.dto.MedicalOfficeParamsDTO;
+import com.p2f4.med_office.dto.ScheduleDTO;
 import com.p2f4.med_office.entity.MedicalOffice;
 import com.p2f4.med_office.entity.Clinic;
 import com.p2f4.med_office.entity.Specialty;
 import com.p2f4.med_office.mapper.MedicalOfficeMapper;
 import com.p2f4.med_office.utils.*;
 
-//import jakarta.persistence.criteria.CriteriaBuilder.In;
 import jakarta.transaction.Transactional;
 
 @Service
@@ -36,6 +41,36 @@ public class MedicalOfficeService {
         this.medicalOfficeMapper = medicalOfficeMapper;
         this.specialtyRepository = specialtyRepository;
         this.scheduleService = scheduleService;
+    }
+
+    // Get all medical offices only with own parameters
+    public List<MedicalOfficeParamsDTO> getAllMedicalOffices() {
+        return medicalOfficeRepository.findAll().stream()
+                .map(medicalOfficeMapper::toParamsDTO) // <-- usar el método válido del mapper
+                .toList();
+    }
+    // Merge medical offices with schedules
+    public List<MedicalOfficeDataUpdatableDTO> mergeMedicalOfficesWithSchedules(List<MedicalOfficeParamsDTO> medicalOffices, List<ScheduleDTO> schedules) {
+        return medicalOffices.stream().map(medicalOffice -> {
+            MedicalOfficeDataUpdatableDTO updatableDTO = new MedicalOfficeDataUpdatableDTO();
+            updatableDTO.setOfficeNumber(medicalOffice.getOfficeNumber());
+            updatableDTO.setClinicName(medicalOffice.getClinicName());
+            updatableDTO.setSpecialtyName(medicalOffice.getSpecialtyName());
+            updatableDTO.setStatus(medicalOffice.getStatus());
+
+            // Find matching schedule
+            ScheduleDTO matchingSchedule = schedules.stream()
+                    .filter(schedule -> schedule.getIdOffice().equals(medicalOffice.getIdOffice()))
+                    .findFirst()
+                    .orElse(null);
+
+            if (matchingSchedule != null) {
+                updatableDTO.setStartDate(matchingSchedule.getStartDate());
+                updatableDTO.setEndDate(matchingSchedule.getEndDate());
+            }
+
+            return updatableDTO;
+        }).toList();
     }
     // Creates a medical office using the ids for the specialty and the clinic
     public MedicalOfficeDTO createMedicalOffice(Integer officeNumber, Integer idClinic, Integer idSpecialty, String status) {
@@ -95,7 +130,7 @@ public class MedicalOfficeService {
     } 
 
     // Updates a medical office using a office number, the names for the specialty, the name for the clinic and the status
-    public MedicalOfficeDTO updateMedicalOffice(Integer idMedicalOffice, Integer officeNumber, String clinicName, String specialtyName, String status) {
+    public MedicalOfficeDTO updateMedicalOffice(Integer idMedicalOffice, Integer officeNumber, String clinicName, String specialtyName, String status, LocalDate startDate, LocalDate endDate) {
 
         //Verify medical office, clinic and specialty existence
         MedicalOffice oldMedicalOffice = medicalOfficeRepository.findById(idMedicalOffice).orElseThrow(MedicalOfficeNotFoundException::new);
@@ -111,8 +146,8 @@ public class MedicalOfficeService {
                 null,
                 "MANTENIMIENTO",
                 oldMedicalOffice.getIdOffice(),
-                null,
-                null
+                startDate,
+                endDate
             );
         }
         // Normalize status
