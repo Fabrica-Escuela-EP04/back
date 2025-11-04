@@ -6,6 +6,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class MedicalOfficeParamsDTO {
+    private Integer idOffice;
     private String clinicName;
     private String specialtyName;
     private Integer officeNumber;
@@ -14,7 +15,8 @@ public class MedicalOfficeParamsDTO {
     public MedicalOfficeParamsDTO() {
     }
 
-    public MedicalOfficeParamsDTO(String clinicName, String specialtyName, Integer officeNumber, String status) {
+    public MedicalOfficeParamsDTO(Integer idOffice, String clinicName, String specialtyName, Integer officeNumber, String status) {
+        this.idOffice = idOffice;
         this.clinicName = clinicName;
         this.specialtyName = specialtyName;
         this.officeNumber = officeNumber;
