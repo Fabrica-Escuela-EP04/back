@@ -136,7 +136,7 @@ public class MedicalOfficeService {
     }
 
     // Updates a medical office using a office number, the names for the specialty, the name for the clinic and the status
-    public MedicalOfficeDTO updateMedicalOffice(Integer idMedicalOffice, Integer officeNumber, String clinicName, String specialtyName, String status, LocalDate startDate, LocalDate endDate) {
+    public MedicalOfficeDTO updateMedicalOffice(Integer idUser, Integer idMedicalOffice, Integer officeNumber, String clinicName, String specialtyName, String status, LocalDate startDate, LocalDate endDate) {
 
         // Verify medical office, clinic and specialty existence
         MedicalOffice oldMedicalOffice = medicalOfficeRepository.findById(idMedicalOffice)
@@ -153,7 +153,7 @@ public class MedicalOfficeService {
         // If status is MANTENIMIENTO, create maintenance schedule
         if(status.equalsIgnoreCase("MANTENIMIENTO")){
             scheduleService.createMaintenanceSchedule(
-                0,
+                idUser,
                 "MANTENIMIENTO",
                 oldMedicalOffice.getIdOffice(),
                 startDate,

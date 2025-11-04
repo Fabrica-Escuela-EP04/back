@@ -6,6 +6,9 @@ import org.springframework.stereotype.Service;
 
 import com.p2f4.med_office.dto.ScheduleDTO;
 import com.p2f4.med_office.mapper.ScheduleMapper;
+//import com.p2f4.med_office.utils.ActiveScheduleException;
+import com.p2f4.med_office.utils.NonCoungruentDatesException;
+import com.p2f4.med_office.utils.NullDateException;
 import com.p2f4.med_office.domain.ScheduleRepository;
 
 import jakarta.transaction.Transactional;
@@ -27,12 +30,18 @@ public class ScheduleService {
     }
     // Creates a maintenance schedule
     public ScheduleDTO createMaintenanceSchedule(Integer idUser, String type, Integer idOffice, LocalDate startDate, LocalDate endDate) {
+        // Validation if exists active maintainance schedule
+        /* 
+        if (scheduleRepository.existsActiveSchedule(idOffice, "ACTIVE")){
+            throw new ActiveScheduleException();
+        }
+        */
         // Validation Date not null and startDate before endDate
         if (startDate == null || endDate == null) {
-            throw new IllegalArgumentException("Las fechas no pueden ser nulas");
+            throw new NullDateException();
         }
         if (endDate.isBefore(startDate)) {
-            throw new IllegalArgumentException("La fecha de finalización no puede ser anterior a la fecha de inicio");
+            throw new NonCoungruentDatesException();
         }
 
         // Create and return the ScheduleDTO
