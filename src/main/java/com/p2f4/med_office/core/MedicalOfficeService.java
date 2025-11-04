@@ -140,10 +140,10 @@ public class MedicalOfficeService {
         // Check clinic status
         if (!"ACTIVE".equalsIgnoreCase(clinic.getStatus())) {throw new ClinicInactiveException();}
 
-
+        // If status is MANTENIMIENTO, create maintenance schedule
         if(status.equalsIgnoreCase("MANTENIMIENTO")){
             scheduleService.createMaintenanceSchedule(
-                null,
+                0,
                 "MANTENIMIENTO",
                 oldMedicalOffice.getIdOffice(),
                 startDate,
