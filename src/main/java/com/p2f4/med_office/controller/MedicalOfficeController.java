@@ -84,6 +84,7 @@ public class MedicalOfficeController {
     }
 
     @PutMapping("/update/{idOffice}")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     public ResponseEntity<MedicalOfficeDTO> updateMedicalOffice(
             @PathVariable Integer idOffice,
             @Valid @RequestBody MedicalOfficeParamsDTO request) {
@@ -99,6 +100,7 @@ public class MedicalOfficeController {
     }
 
     @DeleteMapping("/delete/{idOffice}")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
     public ResponseEntity<MedicalOfficeParamsDTO> deactivateMedicalOffice(@PathVariable Integer idOffice) {
         MedicalOffice office = medicalOfficeService.deactivateMedicalOffice(idOffice);
         MedicalOfficeParamsDTO dto = new MedicalOfficeParamsDTO(

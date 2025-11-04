@@ -6,11 +6,13 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import jakarta.transaction.Transactional;
 
 import com.p2f4.med_office.domain.SpecialtyRepository;
 import com.p2f4.med_office.mapper.SpecialtyMapper;
 
 @Service
+@Transactional
 public class SpecialtyService {
 
     private final SpecialtyRepository specialtyRepository;

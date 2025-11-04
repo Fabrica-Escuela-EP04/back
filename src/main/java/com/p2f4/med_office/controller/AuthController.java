@@ -1,7 +1,9 @@
 package com.p2f4.med_office.controller;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -13,6 +15,7 @@ import com.p2f4.med_office.core.AuthService;
 import com.p2f4.med_office.dto.UserDTO;
 import com.p2f4.med_office.dto.LoginResponse;
 import com.p2f4.med_office.dto.RefreshTokenRequest;
+import com.p2f4.med_office.dto.LoggedUserDTO;
 import com.p2f4.med_office.dto.LoginRequest;
 
 import jakarta.servlet.http.Cookie;
@@ -60,32 +63,36 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<UserDTO> initSession(@Valid @RequestBody LoginRequest request, HttpServletResponse response) {
+    public ResponseEntity<LoggedUserDTO> initSession(@Valid @RequestBody LoginRequest request, HttpServletResponse response) {
 
         LoginResponse loginResponse = authService.Login(request.getEmail(), request.getPassword());
 
-        Cookie accessCookie = new Cookie(authCookieName, loginResponse.getToken());
-        accessCookie.setHttpOnly(true);
-        accessCookie.setSecure(false);
-        // accessCookie.setAttribute("sameSite", "None");
-        accessCookie.setPath("/");
-        accessCookie.setMaxAge(jwtExpiration.intValue() / 1000);
+        // Access token
+        ResponseCookie accessCookie = ResponseCookie.from(authCookieName, loginResponse.getToken())
+            .httpOnly(true)
+            .secure(false)
+            .sameSite("Lax") // <-- aquí sí se aplica correctamente
+            .path("/")
+            .maxAge(jwtExpiration.intValue() / 1000)
+            .build();
 
-        Cookie refreshCookie = new Cookie(refreshCokieName, loginResponse.getRefreshToken());
-        refreshCookie.setHttpOnly(true);
-        refreshCookie.setSecure(false);
-        accessCookie.setAttribute("sameSite", "None");
-        refreshCookie.setPath(REFRESH_URL);
-        refreshCookie.setMaxAge(jwtRefreshExpiration.intValue() / 1000);
+        // Refresh token
+        ResponseCookie refreshCookie = ResponseCookie.from(refreshCokieName, loginResponse.getRefreshToken())
+            .httpOnly(true)
+            .secure(false)
+            .sameSite("Lax")
+            .path(REFRESH_URL)
+            .maxAge(jwtRefreshExpiration.intValue() / 1000)
+            .build();
 
-        response.addCookie(accessCookie);
-        response.addCookie(refreshCookie);
+        response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
 
-        return ResponseEntity.status(HttpStatus.OK).body(loginResponse.getUserDTO());
+        return ResponseEntity.status(HttpStatus.OK).body(loginResponse.getLoggedUserDTO());
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<UserDTO> refreshToken(@RequestBody RefreshTokenRequest request,
+    public ResponseEntity<LoggedUserDTO> refreshToken(@RequestBody RefreshTokenRequest request,
             HttpServletResponse response) {
 
         LoginResponse loginResponse = authService.refreshToken(request.getRefreshToken());
@@ -93,13 +100,13 @@ public class AuthController {
         Cookie accessCookie = new Cookie("access_token", loginResponse.getToken());
         accessCookie.setHttpOnly(true);
         accessCookie.setSecure(false);
-        accessCookie.setAttribute("sameSite", "None");
+        accessCookie.setAttribute("SameSite", "None");
         accessCookie.setPath("/");
         accessCookie.setMaxAge(jwtExpiration.intValue() / 1000);
 
         response.addCookie(accessCookie);
 
-        return ResponseEntity.status(HttpStatus.OK).body(loginResponse.getUserDTO());
+        return ResponseEntity.status(HttpStatus.OK).body(loginResponse.getLoggedUserDTO());
     }
 
     @PostMapping("/logout")

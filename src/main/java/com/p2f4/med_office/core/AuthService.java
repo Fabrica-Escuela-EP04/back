@@ -5,11 +5,13 @@ import com.p2f4.med_office.entity.User;
 import com.p2f4.med_office.domain.UserRepository;
 import com.p2f4.med_office.domain.UserRoleRepository;
 import com.p2f4.med_office.mapper.UserMapper;
+import com.p2f4.med_office.dto.LoggedUserDTO;
 import com.p2f4.med_office.dto.LoginResponse;
 import com.p2f4.med_office.utils.UserNotFoundException;
 import com.p2f4.med_office.utils.UserRoleNotFoundException;
 import com.p2f4.med_office.utils.DuplicatedUserException;
 
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -17,6 +19,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Service
+@Transactional
 public class AuthService {
     private final UserRepository userRepository;
     private final UserRoleRepository userRoleRepository;
@@ -75,10 +78,17 @@ public class AuthService {
         );
 
         var user = userRepository.findByEmail(userEmail).orElseThrow(()->new UserNotFoundException());
-        UserDTO userDTO = userMapper.toDTO(user);
+        
+        LoggedUserDTO loggedUser = new LoggedUserDTO();
+        loggedUser.setIdUser(user.getIdUser());
+        loggedUser.setName(user.getName());
+        loggedUser.setLastName(user.getLastName());
+        loggedUser.setEmail(user.getEmail());
+        loggedUser.setUserRole(user.getUserRole().getName());
+
         String token = jwtService.generateToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
-        return new LoginResponse(token, refreshToken, userDTO);
+        return new LoginResponse(token, refreshToken, loggedUser);
  
     }
 
@@ -96,8 +106,15 @@ public class AuthService {
             throw new IllegalArgumentException("Invalid Refresh Token");
         }
 
+        LoggedUserDTO loggedUser = new LoggedUserDTO();
+        loggedUser.setIdUser(user.getIdUser());
+        loggedUser.setName(user.getName());
+        loggedUser.setLastName(user.getLastName());
+        loggedUser.setEmail(user.getEmail());
+        loggedUser.setUserRole(user.getUserRole().getName());
+
         String accessToken = jwtService.generateToken(user);
-        return new LoginResponse(accessToken, refreshToken, userMapper.toDTO(user));
+        return new LoginResponse(accessToken, refreshToken, loggedUser);
 
     }
     

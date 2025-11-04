@@ -13,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.p2f4.med_office.domain.UserRepository;
 import com.p2f4.med_office.entity.User;
+import com.p2f4.med_office.security.CustomAuthenticationProvider;
 import com.p2f4.med_office.utils.UserNotFoundException;
 
 @Configuration(proxyBeanMethods=false)
@@ -45,7 +46,7 @@ public class ApiConfiguration {
 
     @Bean
     public AuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+        DaoAuthenticationProvider authProvider = new CustomAuthenticationProvider();
         authProvider.setUserDetailsService(userDetailService());
         authProvider.setPasswordEncoder(passwordEncoder());
         return authProvider;
