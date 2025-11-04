@@ -14,7 +14,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.p2f4.med_office.core.*;
 
 import com.p2f4.med_office.dto.MedicalOfficeDTO;
+import com.p2f4.med_office.dto.MedicalOfficeDataUpdatableDTO;
 import com.p2f4.med_office.dto.MedicalOfficeParamsDTO;
+import com.p2f4.med_office.dto.ScheduleDTO;
 import com.p2f4.med_office.dto.MedicalInformationDTO;
 import com.p2f4.med_office.dto.ClinicDTO;
 import com.p2f4.med_office.dto.SpecialtyDTO;
@@ -33,12 +35,14 @@ public class MedicalOfficeController {
     private final MedicalOfficeService medicalOfficeService;
     private final SpecialtyService specialtyService;
     private final ClinicService clinicService;
+    private final ScheduleService scheduleService;
+    
 
-    public MedicalOfficeController(MedicalOfficeService medicalOfficeService, SpecialtyService specialtyService,
-            ClinicService clinicService) {
+    public MedicalOfficeController(MedicalOfficeService medicalOfficeService, SpecialtyService specialtyService, ClinicService clinicService, ScheduleService scheduleService ) {
         this.medicalOfficeService = medicalOfficeService;
         this.clinicService = clinicService;
         this.specialtyService = specialtyService;
+        this.scheduleService = scheduleService;
     }
 
     @GetMapping
@@ -55,6 +59,15 @@ public class MedicalOfficeController {
 
     }
 
+    @GetMapping("/all")
+    public ResponseEntity<List<MedicalOfficeDataUpdatableDTO>> findAllMedicalOffices() {
+        List<MedicalOfficeParamsDTO> medicalOffices = medicalOfficeService.getAllMedicalOffices();
+        List<ScheduleDTO> schedules = scheduleService.getAllSchedules();
+        List<MedicalOfficeDataUpdatableDTO> AllmedicalOffices = medicalOfficeService.mergeMedicalOfficesWithSchedules(medicalOffices, schedules);
+
+        return ResponseEntity.status(HttpStatus.OK).body(AllmedicalOffices);
+    }
+    
     @PostMapping("/create")
     @PreAuthorize("hasRole('ADMINISTRADOR')")
     public ResponseEntity<MedicalOfficeDTO> createMedicalOffice(
@@ -87,14 +100,17 @@ public class MedicalOfficeController {
     @PreAuthorize("hasRole('ADMINISTRADOR')")
     public ResponseEntity<MedicalOfficeDTO> updateMedicalOffice(
             @PathVariable Integer idOffice,
-            @Valid @RequestBody MedicalOfficeParamsDTO request) {
+            @Valid @RequestBody MedicalOfficeDataUpdatableDTO request) {
 
         MedicalOfficeDTO updated = medicalOfficeService.updateMedicalOffice(
                 idOffice,
                 request.getOfficeNumber(),
                 request.getClinicName(),
                 request.getSpecialtyName(),
-                request.getStatus());
+                request.getStatus(),
+                request.getStartDate(),
+                request.getEndDate()
+        );
 
         return ResponseEntity.status(HttpStatus.OK).body(updated);
     }
