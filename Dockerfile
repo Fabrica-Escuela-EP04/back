@@ -5,7 +5,7 @@ COPY . .
 RUN mvn clean package -DskipTests
 
 # Packing phase (runtime)
-FROM openjdk:17-jdk-slim
+FROM eclipse-temurin:17-jdk-jammy
 WORKDIR /app
 # Copy JAR file from build phase to current phase
 COPY --from=build /app/target/med-office.jar med-office.jar
