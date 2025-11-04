@@ -7,5 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 @Repository
 public interface ScheduleRepository extends JpaRepository<Schedule, Integer> {
-    boolean existsActiveSchedule(Integer idOffice, String status);
+   // boolean existsActiveSchedule(Integer idOffice, String status);
 }
