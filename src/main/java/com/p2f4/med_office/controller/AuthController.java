@@ -41,41 +41,40 @@ public class AuthController {
     public AuthController(AuthService authService) {
         this.authService = authService;
     }
-    
+
     @PostMapping("/register")
     public ResponseEntity<UserDTO> createMedicalOffice(
-           @Valid @RequestBody UserDTO request) {
+            @Valid @RequestBody UserDTO request) {
 
         UserDTO newUser = authService.createUser(
-                        request.getEmail(), 
-                        request.getPassword(), 
-                        request.getIdRole(),
-                        request.getName(),
-                        request.getLastName(),
-                        request.getDocument(),
-                        request.getDocumentType(),
-                        request.getPhoneNumber() 
-                        );
+                request.getEmail(),
+                request.getPassword(),
+                request.getIdRole(),
+                request.getName(),
+                request.getLastName(),
+                request.getDocument(),
+                request.getDocumentType(),
+                request.getPhoneNumber());
 
         return ResponseEntity.status(HttpStatus.CREATED).body(newUser);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<UserDTO> initSession(@Valid @RequestBody LoginRequest request, HttpServletResponse response){
+    public ResponseEntity<UserDTO> initSession(@Valid @RequestBody LoginRequest request, HttpServletResponse response) {
 
         LoginResponse loginResponse = authService.Login(request.getEmail(), request.getPassword());
-        
+
         Cookie accessCookie = new Cookie(authCookieName, loginResponse.getToken());
         accessCookie.setHttpOnly(true);
-        accessCookie.setSecure(true);
-        accessCookie.setAttribute("sameSite","None" );
+        accessCookie.setSecure(false);
+        // accessCookie.setAttribute("sameSite", "None");
         accessCookie.setPath("/");
-        accessCookie.setMaxAge(jwtExpiration.intValue() / 1000); 
+        accessCookie.setMaxAge(jwtExpiration.intValue() / 1000);
 
         Cookie refreshCookie = new Cookie(refreshCokieName, loginResponse.getRefreshToken());
         refreshCookie.setHttpOnly(true);
-        refreshCookie.setSecure(true);
-        accessCookie.setAttribute("sameSite","None" );
+        refreshCookie.setSecure(false);
+        accessCookie.setAttribute("sameSite", "None");
         refreshCookie.setPath(REFRESH_URL);
         refreshCookie.setMaxAge(jwtRefreshExpiration.intValue() / 1000);
 
@@ -86,16 +85,17 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<UserDTO> refreshToken(@RequestBody RefreshTokenRequest request, HttpServletResponse response) {
-        
+    public ResponseEntity<UserDTO> refreshToken(@RequestBody RefreshTokenRequest request,
+            HttpServletResponse response) {
+
         LoginResponse loginResponse = authService.refreshToken(request.getRefreshToken());
 
         Cookie accessCookie = new Cookie("access_token", loginResponse.getToken());
         accessCookie.setHttpOnly(true);
-        accessCookie.setSecure(true);
-        accessCookie.setAttribute("sameSite","None" );
+        accessCookie.setSecure(false);
+        accessCookie.setAttribute("sameSite", "None");
         accessCookie.setPath("/");
-        accessCookie.setMaxAge(jwtExpiration.intValue() / 1000); 
+        accessCookie.setMaxAge(jwtExpiration.intValue() / 1000);
 
         response.addCookie(accessCookie);
 
@@ -103,15 +103,15 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(HttpServletResponse response){
+    public ResponseEntity<Void> logout(HttpServletResponse response) {
         Cookie accessTokenCookie = new Cookie("access_token", null);
         accessTokenCookie.setMaxAge(0);
         accessTokenCookie.setPath("/");
-        
+
         Cookie refreshTokenCookie = new Cookie("refresh_token", null);
         refreshTokenCookie.setMaxAge(0);
         refreshTokenCookie.setPath("/api/auth/refresh");
-        
+
         response.addCookie(accessTokenCookie);
         response.addCookie(refreshTokenCookie);
 
