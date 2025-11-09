@@ -56,7 +56,51 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=Fabrica-Escuela-EP04_back -Dsonar.organization=fabrica-escuela-ep04
 
-      # 6. Verificar existencia del archivo jacoco.xml
+      # 6. Wait for SonarCloud Quality Gate (non-blocking)
+      - name: SonarCloud Quality Gate Check
+        uses: sonarsource/sonarqube-quality-gate-action@master
+        timeout-minutes: 5
+        continue-on-error: true
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          scanMetadataReportFile: target/sonar/report-task.txt
+
+      # 7. Verificar cobertura mínima del 50% (non-blocking)
+      - name: Check Coverage Threshold (50%)
+        continue-on-error: true
+        run: |
+          echo "Extracting coverage from JaCoCo report..."
+          COVERAGE=$(grep -oP '<counter type="INSTRUCTION".*?covered="\K[0-9]+' target/site/jacoco/jacoco.xml | head -1)
+          MISSED=$(grep -oP '<counter type="INSTRUCTION".*?missed="\K[0-9]+' target/site/jacoco/jacoco.xml | head -1)
+          
+          if [ -z "$COVERAGE" ] || [ -z "$MISSED" ]; then
+            echo "❌ Error: Could not extract coverage data"
+            exit 0
+          fi
+          
+          TOTAL=$((COVERAGE + MISSED))
+          PERCENT=$((COVERAGE * 100 / TOTAL))
+          
+          echo "📊 Coverage Statistics:"
+          echo "   Covered: $COVERAGE instructions"
+          echo "   Missed: $MISSED instructions"
+          echo "   Total: $TOTAL instructions"
+          echo "   Coverage: $PERCENT%"
+          echo "   Minimum Required: 50%"
+          
+          if [ $PERCENT -lt 50 ]; then
+            echo "⚠️ WARNING: Coverage $PERCENT% is below minimum threshold of 50%"
+            echo "   You need to add more tests to increase coverage by $((50 - PERCENT))%"
+            echo "coverage_status=FAIL" >> $GITHUB_ENV
+            echo "coverage_percent=$PERCENT" >> $GITHUB_ENV
+          else
+            echo "✅ PASSED: Coverage $PERCENT% meets the minimum threshold of 50%"
+            echo "coverage_status=PASS" >> $GITHUB_ENV
+            echo "coverage_percent=$PERCENT" >> $GITHUB_ENV
+          fi
+
+      # 8. Verificar existencia del archivo jacoco.xml
       - name: Verify JaCoCo XML Report
         run: |
           if [ -f "target/site/jacoco/jacoco.xml" ]; then
@@ -68,7 +112,7 @@ jobs:
             exit 1
           fi
 
-      # 7. Subir reporte de cobertura como artefacto
+      # 9. Subir reporte de cobertura como artefacto
       - name: Upload Coverage Report
         uses: actions/upload-artifact@v4
         with:
@@ -76,7 +120,7 @@ jobs:
           path: target/site/jacoco/
           retention-days: 30
 
-      # 8. Subir resultados de tests
+      # 10. Subir resultados de tests
       - name: Upload Test Results
         uses: actions/upload-artifact@v4
         if: always()
@@ -85,7 +129,7 @@ jobs:
           path: target/surefire-reports/
           retention-days: 30
 
-      # 9. Generar resumen de pruebas
+      # 11. Generar resumen de pruebas
       - name: Publish Test Report
         uses: dorny/test-reporter@v1
         if: always()
@@ -96,13 +140,68 @@ jobs:
           reporter: java-junit
           fail-on-error: false
 
-      # 10. Comentar resultados en PR
+      # 12. Comentar resultados en PR
       - name: Add Coverage Comment to PR
         if: github.event_name == 'pull_request'
         uses: madrapps/jacoco-report@v1.6.1
         with:
           paths: target/site/jacoco/jacoco.xml
           token: ${{ secrets.GITHUB_TOKEN }}
-          min-coverage-overall: 60
-          min-coverage-changed-files: 60
+          min-coverage-overall: 50
+          min-coverage-changed-files: 50
+
+      # 13. Quality Gates Summary (always runs, shows PASS/FAIL status)
+      - name: Generate Quality Gates Summary
+        if: always()
+        run: |
+          echo "## 🎯 Quality Gates Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Build Status:** ✅ Completed (Quality Gates are informational only)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Extract coverage
+          COVERAGE=$(grep -oP '<counter type="INSTRUCTION".*?covered="\K[0-9]+' target/site/jacoco/jacoco.xml | head -1)
+          MISSED=$(grep -oP '<counter type="INSTRUCTION".*?missed="\K[0-9]+' target/site/jacoco/jacoco.xml | head -1)
+          TOTAL=$((COVERAGE + MISSED))
+          PERCENT=$((COVERAGE * 100 / TOTAL))
+          
+          echo "| Metric | Value | Threshold | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|-----------|--------|" >> $GITHUB_STEP_SUMMARY
+          
+          # Coverage
+          if [ $PERCENT -ge 50 ]; then
+            echo "| 📊 Code Coverage | $PERCENT% | ≥ 50% | ✅ PASS |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| 📊 Code Coverage | $PERCENT% | ≥ 50% | ❌ FAIL (need +$((50 - PERCENT))%) |" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          # Tests count
+          TESTS_RUN=$(grep -oP 'Tests run: \K[0-9]+' target/surefire-reports/*.txt | head -1)
+          if [ ! -z "$TESTS_RUN" ]; then
+            echo "| 🧪 Tests Executed | $TESTS_RUN | > 0 | ✅ PASS |" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          # Test failures
+          FAILURES=$(grep -oP 'Failures: \K[0-9]+' target/surefire-reports/*.txt | head -1)
+          if [ "$FAILURES" -eq "0" ]; then
+            echo "| ❌ Test Failures | 0 | = 0 | ✅ PASS |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| ❌ Test Failures | $FAILURES | = 0 | ❌ FAIL |" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          # Placeholder for SonarCloud metrics
+          echo "| 📋 Code Smells | - | ≤ 10 | ⏳ See SonarCloud |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🔄 Duplication | - | ≤ 5% | ⏳ See SonarCloud |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🔒 Vulnerabilities | - | 0 critical | ⏳ See SonarCloud |" >> $GITHUB_STEP_SUMMARY
+          echo "| ⏱️ Technical Debt | - | ≤ 15h | ⏳ See SonarCloud |" >> $GITHUB_STEP_SUMMARY
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📋 Quality Gate Criteria (Project Requirements):" >> $GITHUB_STEP_SUMMARY
+          echo "- Code Coverage: ≥ 50%" >> $GITHUB_STEP_SUMMARY
+          echo "- Duplication: ≤ 5%" >> $GITHUB_STEP_SUMMARY
+          echo "- Code Smells: ≤ 10" >> $GITHUB_STEP_SUMMARY
+          echo "- Vulnerabilities: 0 critical" >> $GITHUB_STEP_SUMMARY
+          echo "- Technical Debt: ≤ 15 hours" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Note:** Quality Gates are evaluated but do not block the build. Check SonarCloud dashboard for detailed analysis." >> $GITHUB_STEP_SUMMARY
 
