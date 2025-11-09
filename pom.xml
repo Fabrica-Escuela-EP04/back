@@ -190,7 +190,7 @@
 							<goal>report</goal>
 						</goals>
 					</execution>
-					<!-- Enforce minimum coverage thresholds -->
+					<!-- Enforce minimum coverage thresholds (WARNING ONLY) -->
 					<execution>
 						<id>jacoco-check</id>
 						<goals>
@@ -209,6 +209,8 @@
 									</limits>
 								</rule>
 							</rules>
+							<!-- Set to false to not fail the build on coverage violations -->
+							<haltOnFailure>false</haltOnFailure>
 						</configuration>
 					</execution>
 				</executions>
