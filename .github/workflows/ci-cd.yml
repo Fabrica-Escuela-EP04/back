@@ -31,7 +31,7 @@ jobs:
 
       # 3. Cache de dependencias Maven
       - name: Cache Maven packages
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
@@ -75,7 +75,7 @@ jobs:
 
       # 9. Subir reporte de cobertura como artefacto
       - name: Upload Coverage Report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: jacoco-coverage-report
           path: target/site/jacoco/
@@ -83,7 +83,7 @@ jobs:
 
       # 10. Subir resultados de tests
       - name: Upload Test Results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: test-results
