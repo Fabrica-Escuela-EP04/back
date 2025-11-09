@@ -1,0 +1,108 @@
+name: CI/CD Pipeline - Tests, Coverage & SonarCloud
+
+on:
+  push:
+    branches:
+      - main
+      - calidad
+      - develop
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+
+jobs:
+  test-and-analyze:
+    name: Build, Test & Code Analysis
+    runs-on: ubuntu-latest
+    
+    steps:
+      # 1. Checkout del código
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for better analysis
+
+      # 2. Configurar JDK 17
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      # 3. Cache SonarCloud packages
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+
+      # 4. Cache de dependencias Maven
+      - name: Cache Maven packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      # 5. Build, Test and Analyze with SonarCloud
+      - name: Build and analyze
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=Fabrica-Escuela-EP04_back -Dsonar.organization=fabrica-escuela-ep04
+
+      # 6. Verificar existencia del archivo jacoco.xml
+      - name: Verify JaCoCo XML Report
+        run: |
+          if [ -f "target/site/jacoco/jacoco.xml" ]; then
+            echo "✅ JaCoCo XML report found!"
+            echo "Report location: target/site/jacoco/jacoco.xml"
+            ls -lh target/site/jacoco/jacoco.xml
+          else
+            echo "❌ JaCoCo XML report NOT found!"
+            exit 1
+          fi
+
+      # 7. Subir reporte de cobertura como artefacto
+      - name: Upload Coverage Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-coverage-report
+          path: target/site/jacoco/
+          retention-days: 30
+
+      # 8. Subir resultados de tests
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: target/surefire-reports/
+          retention-days: 30
+
+      # 9. Generar resumen de pruebas
+      - name: Publish Test Report
+        uses: dorny/test-reporter@v1
+        if: always()
+        continue-on-error: true
+        with:
+          name: Maven Tests
+          path: target/surefire-reports/*.xml
+          reporter: java-junit
+          fail-on-error: false
+
+      # 10. Comentar resultados en PR
+      - name: Add Coverage Comment to PR
+        if: github.event_name == 'pull_request'
+        uses: madrapps/jacoco-report@v1.6.1
+        with:
+          paths: target/site/jacoco/jacoco.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          min-coverage-overall: 60
+          min-coverage-changed-files: 60
+
