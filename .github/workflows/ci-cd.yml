@@ -75,14 +75,14 @@ jobs:
           MISSED=$(grep -oP '<counter type="INSTRUCTION".*?missed="\K[0-9]+' target/site/jacoco/jacoco.xml | head -1)
           
           if [ -z "$COVERAGE" ] || [ -z "$MISSED" ]; then
-            echo "❌ Error: Could not extract coverage data"
+            echo "[ERROR] Could not extract coverage data"
             exit 0
           fi
           
           TOTAL=$((COVERAGE + MISSED))
           PERCENT=$((COVERAGE * 100 / TOTAL))
           
-          echo "📊 Coverage Statistics:"
+          echo "Coverage Statistics:"
           echo "   Covered: $COVERAGE instructions"
           echo "   Missed: $MISSED instructions"
           echo "   Total: $TOTAL instructions"
@@ -90,12 +90,12 @@ jobs:
           echo "   Minimum Required: 50%"
           
           if [ $PERCENT -lt 50 ]; then
-            echo "⚠️ WARNING: Coverage $PERCENT% is below minimum threshold of 50%"
+            echo "[WARNING] Coverage $PERCENT% is below minimum threshold of 50%"
             echo "   You need to add more tests to increase coverage by $((50 - PERCENT))%"
             echo "coverage_status=FAIL" >> $GITHUB_ENV
             echo "coverage_percent=$PERCENT" >> $GITHUB_ENV
           else
-            echo "✅ PASSED: Coverage $PERCENT% meets the minimum threshold of 50%"
+            echo "[PASSED] Coverage $PERCENT% meets the minimum threshold of 50%"
             echo "coverage_status=PASS" >> $GITHUB_ENV
             echo "coverage_percent=$PERCENT" >> $GITHUB_ENV
           fi
@@ -104,11 +104,11 @@ jobs:
       - name: Verify JaCoCo XML Report
         run: |
           if [ -f "target/site/jacoco/jacoco.xml" ]; then
-            echo "✅ JaCoCo XML report found!"
+            echo "[SUCCESS] JaCoCo XML report found!"
             echo "Report location: target/site/jacoco/jacoco.xml"
             ls -lh target/site/jacoco/jacoco.xml
           else
-            echo "❌ JaCoCo XML report NOT found!"
+            echo "[ERROR] JaCoCo XML report NOT found!"
             exit 1
           fi
 
@@ -154,54 +154,169 @@ jobs:
       - name: Generate Quality Gates Summary
         if: always()
         run: |
-          echo "## 🎯 Quality Gates Results" >> $GITHUB_STEP_SUMMARY
+          echo "## Quality Gates Results" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Build Status:** ✅ Completed (Quality Gates are informational only)" >> $GITHUB_STEP_SUMMARY
+          echo "**Build Status:** Completed (Quality Gates are informational only)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           
-          # Extract coverage
-          COVERAGE=$(grep -oP '<counter type="INSTRUCTION".*?covered="\K[0-9]+' target/site/jacoco/jacoco.xml | head -1)
-          MISSED=$(grep -oP '<counter type="INSTRUCTION".*?missed="\K[0-9]+' target/site/jacoco/jacoco.xml | head -1)
-          TOTAL=$((COVERAGE + MISSED))
-          PERCENT=$((COVERAGE * 100 / TOTAL))
+          # Extract coverage from JaCoCo XML
+          if [ -f "target/site/jacoco/jacoco.xml" ]; then
+            COVERED=$(grep -m 1 'type="INSTRUCTION"' target/site/jacoco/jacoco.xml | grep -oP 'covered="\K[0-9]+')
+            MISSED=$(grep -m 1 'type="INSTRUCTION"' target/site/jacoco/jacoco.xml | grep -oP 'missed="\K[0-9]+')
+            
+            if [ ! -z "$COVERED" ] && [ ! -z "$MISSED" ]; then
+              TOTAL=$((COVERED + MISSED))
+              PERCENT=$((COVERED * 100 / TOTAL))
+            else
+              PERCENT=0
+            fi
+          else
+            PERCENT=0
+          fi
           
           echo "| Metric | Value | Threshold | Status |" >> $GITHUB_STEP_SUMMARY
           echo "|--------|-------|-----------|--------|" >> $GITHUB_STEP_SUMMARY
           
           # Coverage
           if [ $PERCENT -ge 50 ]; then
-            echo "| 📊 Code Coverage | $PERCENT% | ≥ 50% | ✅ PASS |" >> $GITHUB_STEP_SUMMARY
+            echo "| Code Coverage | ${PERCENT}% | >= 50% | PASS |" >> $GITHUB_STEP_SUMMARY
           else
-            echo "| 📊 Code Coverage | $PERCENT% | ≥ 50% | ❌ FAIL (need +$((50 - PERCENT))%) |" >> $GITHUB_STEP_SUMMARY
+            echo "| Code Coverage | ${PERCENT}% | >= 50% | FAIL (need +$((50 - PERCENT))%) |" >> $GITHUB_STEP_SUMMARY
           fi
           
-          # Tests count
-          TESTS_RUN=$(grep -oP 'Tests run: \K[0-9]+' target/surefire-reports/*.txt | head -1)
-          if [ ! -z "$TESTS_RUN" ]; then
-            echo "| 🧪 Tests Executed | $TESTS_RUN | > 0 | ✅ PASS |" >> $GITHUB_STEP_SUMMARY
+          # Tests count - sum all Tests run
+          TESTS_TOTAL=0
+          if [ -d "target/surefire-reports" ]; then
+            for file in target/surefire-reports/*.txt; do
+              if [ -f "$file" ]; then
+                TESTS=$(grep -oP 'Tests run: \K[0-9]+' "$file" | head -1)
+                if [ ! -z "$TESTS" ]; then
+                  TESTS_TOTAL=$((TESTS_TOTAL + TESTS))
+                fi
+              fi
+            done
           fi
           
-          # Test failures
-          FAILURES=$(grep -oP 'Failures: \K[0-9]+' target/surefire-reports/*.txt | head -1)
-          if [ "$FAILURES" -eq "0" ]; then
-            echo "| ❌ Test Failures | 0 | = 0 | ✅ PASS |" >> $GITHUB_STEP_SUMMARY
+          if [ $TESTS_TOTAL -gt 0 ]; then
+            echo "| Tests Executed | $TESTS_TOTAL | > 0 | PASS |" >> $GITHUB_STEP_SUMMARY
           else
-            echo "| ❌ Test Failures | $FAILURES | = 0 | ❌ FAIL |" >> $GITHUB_STEP_SUMMARY
+            echo "| Tests Executed | 0 | > 0 | FAIL |" >> $GITHUB_STEP_SUMMARY
           fi
           
-          # Placeholder for SonarCloud metrics
-          echo "| 📋 Code Smells | - | ≤ 10 | ⏳ See SonarCloud |" >> $GITHUB_STEP_SUMMARY
-          echo "| 🔄 Duplication | - | ≤ 5% | ⏳ See SonarCloud |" >> $GITHUB_STEP_SUMMARY
-          echo "| 🔒 Vulnerabilities | - | 0 critical | ⏳ See SonarCloud |" >> $GITHUB_STEP_SUMMARY
-          echo "| ⏱️ Technical Debt | - | ≤ 15h | ⏳ See SonarCloud |" >> $GITHUB_STEP_SUMMARY
+          # Test failures - sum all failures
+          FAILURES_TOTAL=0
+          if [ -d "target/surefire-reports" ]; then
+            for file in target/surefire-reports/*.txt; do
+              if [ -f "$file" ]; then
+                FAILS=$(grep -oP 'Failures: \K[0-9]+' "$file" | head -1)
+                if [ ! -z "$FAILS" ]; then
+                  FAILURES_TOTAL=$((FAILURES_TOTAL + FAILS))
+                fi
+              fi
+            done
+          fi
+          
+          if [ $FAILURES_TOTAL -eq 0 ]; then
+            echo "| Test Failures | 0 | = 0 | PASS |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| Test Failures | $FAILURES_TOTAL | = 0 | FAIL |" >> $GITHUB_STEP_SUMMARY
+          fi
           
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 📋 Quality Gate Criteria (Project Requirements):" >> $GITHUB_STEP_SUMMARY
-          echo "- Code Coverage: ≥ 50%" >> $GITHUB_STEP_SUMMARY
-          echo "- Duplication: ≤ 5%" >> $GITHUB_STEP_SUMMARY
-          echo "- Code Smells: ≤ 10" >> $GITHUB_STEP_SUMMARY
+          echo "### Fetching SonarCloud Metrics..." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+      # 14. Fetch SonarCloud Metrics via API
+      - name: Fetch SonarCloud Metrics
+        if: always()
+        continue-on-error: true
+        run: |
+          # Wait for SonarCloud to process (give it some time)
+          sleep 60
+          
+          PROJECT_KEY="Fabrica-Escuela-EP04_back"
+          
+          # Fetch measures from SonarCloud API
+          RESPONSE=$(curl -s -u "${{ secrets.SONAR_TOKEN }}:" \
+            "https://sonarcloud.io/api/measures/component?component=${PROJECT_KEY}&metricKeys=code_smells,duplicated_lines_density,vulnerabilities,sqale_index,reliability_rating,security_rating")
+          
+          echo "SonarCloud API Response:" >> $GITHUB_STEP_SUMMARY
+          echo '```json' >> $GITHUB_STEP_SUMMARY
+          echo "$RESPONSE" | jq '.' >> $GITHUB_STEP_SUMMARY || echo "$RESPONSE" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Extract metrics using jq
+          CODE_SMELLS=$(echo "$RESPONSE" | jq -r '.component.measures[] | select(.metric=="code_smells") | .value' 2>/dev/null || echo "N/A")
+          DUPLICATION=$(echo "$RESPONSE" | jq -r '.component.measures[] | select(.metric=="duplicated_lines_density") | .value' 2>/dev/null || echo "N/A")
+          VULNERABILITIES=$(echo "$RESPONSE" | jq -r '.component.measures[] | select(.metric=="vulnerabilities") | .value' 2>/dev/null || echo "N/A")
+          TECH_DEBT_MIN=$(echo "$RESPONSE" | jq -r '.component.measures[] | select(.metric=="sqale_index") | .value' 2>/dev/null || echo "N/A")
+          
+          # Convert tech debt from minutes to hours
+          if [ "$TECH_DEBT_MIN" != "N/A" ]; then
+            TECH_DEBT_HOURS=$(echo "scale=1; $TECH_DEBT_MIN / 60" | bc)
+          else
+            TECH_DEBT_HOURS="N/A"
+          fi
+          
+          echo "| Metric | Value | Threshold | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|-----------|--------|" >> $GITHUB_STEP_SUMMARY
+          
+          # Code Smells
+          if [ "$CODE_SMELLS" != "N/A" ]; then
+            if [ "$CODE_SMELLS" -le 10 ]; then
+              echo "| Code Smells | $CODE_SMELLS | <= 10 | PASS |" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "| Code Smells | $CODE_SMELLS | <= 10 | FAIL |" >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            echo "| Code Smells | Not available yet | <= 10 | Waiting for SonarCloud |" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          # Duplication
+          if [ "$DUPLICATION" != "N/A" ]; then
+            DUPL_INT=$(echo "$DUPLICATION" | cut -d. -f1)
+            if [ "$DUPL_INT" -le 5 ]; then
+              echo "| Duplication | ${DUPLICATION}% | <= 5% | PASS |" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "| Duplication | ${DUPLICATION}% | <= 5% | FAIL |" >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            echo "| Duplication | Not available yet | <= 5% | Waiting for SonarCloud |" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          # Vulnerabilities
+          if [ "$VULNERABILITIES" != "N/A" ]; then
+            if [ "$VULNERABILITIES" -eq 0 ]; then
+              echo "| Vulnerabilities | $VULNERABILITIES | 0 critical | PASS |" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "| Vulnerabilities | $VULNERABILITIES | 0 critical | FAIL |" >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            echo "| Vulnerabilities | Not available yet | 0 critical | Waiting for SonarCloud |" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          # Technical Debt
+          if [ "$TECH_DEBT_HOURS" != "N/A" ]; then
+            DEBT_INT=$(echo "$TECH_DEBT_HOURS" | cut -d. -f1)
+            if [ "$DEBT_INT" -le 15 ]; then
+              echo "| Technical Debt | ${TECH_DEBT_HOURS}h | <= 15h | PASS |" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "| Technical Debt | ${TECH_DEBT_HOURS}h | <= 15h | FAIL |" >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            echo "| Technical Debt | Not available yet | <= 15h | Waiting for SonarCloud |" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Quality Gate Criteria:" >> $GITHUB_STEP_SUMMARY
+          echo "- Code Coverage: >= 50%" >> $GITHUB_STEP_SUMMARY
+          echo "- Duplication: <= 5%" >> $GITHUB_STEP_SUMMARY
+          echo "- Code Smells: <= 10" >> $GITHUB_STEP_SUMMARY
           echo "- Vulnerabilities: 0 critical" >> $GITHUB_STEP_SUMMARY
-          echo "- Technical Debt: ≤ 15 hours" >> $GITHUB_STEP_SUMMARY
+          echo "- Technical Debt: <= 15 hours" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Note:** Quality Gates are evaluated but do not block the build. Check SonarCloud dashboard for detailed analysis." >> $GITHUB_STEP_SUMMARY
+          echo "**SonarCloud Dashboard:** https://sonarcloud.io/dashboard?id=${PROJECT_KEY}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Note:** If SonarCloud metrics show 'Not available yet', wait 1-2 minutes and check the dashboard directly." >> $GITHUB_STEP_SUMMARY
 
