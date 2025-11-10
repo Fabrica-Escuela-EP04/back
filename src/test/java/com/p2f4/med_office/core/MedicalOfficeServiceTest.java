@@ -609,4 +609,6 @@ class MedicalOfficeServiceTest {
             assertNull(result.get(0).getEndDate(), "La fecha fin debe ser nula");
         }
     }
+
+    //Final
 }
