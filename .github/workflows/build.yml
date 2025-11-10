@@ -44,7 +44,7 @@ jobs:
           path: target/med-office.jar
       #Push image to docker
       - name: Build & push Docker image
-        uses: mr-smithers-excellent/docker-build-push@v6
+        uses: mr-smithers-excellent/docker-build-push@4964e1ab67900beb03b21673515f489d9a142494
         with:
           image: afflorezc/fabrica-escuela-2025-2-back
           tags: latest

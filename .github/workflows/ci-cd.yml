@@ -58,7 +58,7 @@ jobs:
 
       # 6. Wait for SonarCloud Quality Gate (non-blocking)
       - name: SonarCloud Quality Gate Check
-        uses: sonarsource/sonarqube-quality-gate-action@master
+        uses: sonarsource/sonarqube-quality-gate-action@72f24ebf1f81eda168a979ce14b8203273b7c3ad
         timeout-minutes: 5
         continue-on-error: true
         env:
@@ -131,7 +131,7 @@ jobs:
 
       # 11. Generar resumen de pruebas
       - name: Publish Test Report
-        uses: dorny/test-reporter@v1
+        uses: dorny/test-reporter@31a54ee7ebcacc03a09ea97a7e5465a47b84aea5
         if: always()
         continue-on-error: true
         with:
@@ -143,7 +143,7 @@ jobs:
       # 12. Comentar resultados en PR
       - name: Add Coverage Comment to PR
         if: github.event_name == 'pull_request'
-        uses: madrapps/jacoco-report@v1.6.1
+        uses: madrapps/jacoco-report@50d3aff4548aa991e6753342d9ba291084e63848
         with:
           paths: target/site/jacoco/jacoco.xml
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -235,9 +235,10 @@ jobs:
           sleep 60
           
           PROJECT_KEY="Fabrica-Escuela-EP04_back"
+          SONAR_TOKEN="${{ secrets.SONAR_TOKEN }}"
           
           # Fetch measures from SonarCloud API
-          RESPONSE=$(curl -s -u "${{ secrets.SONAR_TOKEN }}:" \
+          RESPONSE=$(curl -s -u "${SONAR_TOKEN}:" \
             "https://sonarcloud.io/api/measures/component?component=${PROJECT_KEY}&metricKeys=code_smells,duplicated_lines_density,vulnerabilities,sqale_index,reliability_rating,security_rating")
           
           echo "SonarCloud API Response:" >> $GITHUB_STEP_SUMMARY
