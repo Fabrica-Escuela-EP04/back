@@ -2,6 +2,7 @@ package com.p2f4.med_office.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import static org.springframework.security.config.Customizer.withDefaults;
@@ -21,6 +22,7 @@ import jakarta.servlet.http.HttpServletResponse;
 @Configuration
 @EnableWebSecurity(debug = false)
 @EnableMethodSecurity
+@Profile("!test")
 public class SecurityConfiguration {
 
     private final AuthenticationProvider authenticationProvider;
