@@ -1,6 +1,6 @@
 package com.p2f4.med_office.dto;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -14,7 +14,7 @@ public class MedicalOfficeUpdateDTO {
     private Integer idModification;
     @NotNull @Positive private Integer idOffice;
     @NotNull @Positive private Integer idUser;
-    @NotNull private Timestamp modificationDate;
+    @NotNull private LocalDateTime modificationDate;
     @NotNull private String previousClinic;
     @NotNull private String previousSpecialty;
     @NotNull @Positive private Integer previousOfficeNumber;
@@ -31,7 +31,7 @@ public class MedicalOfficeUpdateDTO {
         Integer idModification,
         Integer idOffice,
         Integer idUser,
-        Timestamp modificationDate,
+        LocalDateTime modificationDate,
         String previousClinic,
         String previousSpecialty,
         Integer previousOfficeNumber,

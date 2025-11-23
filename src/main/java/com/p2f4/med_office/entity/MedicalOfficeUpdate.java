@@ -1,5 +1,5 @@
 package com.p2f4.med_office.entity;
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -24,7 +24,7 @@ public class MedicalOfficeUpdate {
     private User idUser;
     
     @Column(name = "modification_date", nullable = false)
-    private Timestamp modificationDate;
+    private LocalDateTime modificationDate;
 
     @Column(name = "previous_clinic", nullable = false)
     private String previousClinic;
