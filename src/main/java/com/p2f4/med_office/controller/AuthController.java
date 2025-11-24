@@ -17,6 +17,7 @@ import com.p2f4.med_office.core.AuthService;
 import com.p2f4.med_office.dto.LoggedUserDTO;
 import com.p2f4.med_office.dto.LoginRequest;
 import com.p2f4.med_office.dto.LoginResponse;
+import com.p2f4.med_office.dto.UserDTO;
 import com.p2f4.med_office.dto.LoggedUserDTO;
 import com.p2f4.med_office.dto.LoginRequest;
 
