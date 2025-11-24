@@ -55,6 +55,9 @@ public class AuthService {
         if (!userRoleRepository.existsById(idRole)){
             throw new UserRoleNotFoundException();
         }
+        
+        // Validate password strength
+        validatePasswordStrength(password);
 
         User user = new User();
         user.setName(name);
@@ -69,6 +72,50 @@ public class AuthService {
         var savedEntity = userRepository.save(user);
         return userMapper.toDTO(savedEntity);
 
+    }
+    
+    /**
+     * Validates password strength according to security best practices
+     * @param password The password to validate
+     * @throws IllegalArgumentException if password doesn't meet requirements
+     */
+    private void validatePasswordStrength(String password) {
+        if (password == null || password.trim().isEmpty()) {
+            throw new IllegalArgumentException("La contraseña no puede estar vacía");
+        }
+        
+        if (password.length() < 8) {
+            throw new IllegalArgumentException("La contraseña debe tener al menos 8 caracteres");
+        }
+        
+        // Check for at least one uppercase letter
+        if (!password.matches(".*[A-Z].*")) {
+            throw new IllegalArgumentException("La contraseña debe contener al menos una letra mayúscula");
+        }
+        
+        // Check for at least one lowercase letter
+        if (!password.matches(".*[a-z].*")) {
+            throw new IllegalArgumentException("La contraseña debe contener al menos una letra minúscula");
+        }
+        
+        // Check for at least one digit
+        if (!password.matches(".*\\d.*")) {
+            throw new IllegalArgumentException("La contraseña debe contener al menos un número");
+        }
+        
+        // Check for at least one special character
+        if (!password.matches(".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?].*")) {
+            throw new IllegalArgumentException("La contraseña debe contener al menos un carácter especial (!@#$%^&*()_+-=[]{}...)");
+        }
+        
+        // Check for common weak passwords
+        String[] weakPasswords = {"password", "12345678", "qwerty123", "admin123", "password1"};
+        String lowerPassword = password.toLowerCase();
+        for (String weak : weakPasswords) {
+            if (lowerPassword.contains(weak)) {
+                throw new IllegalArgumentException("La contraseña es demasiado común o predecible");
+            }
+        }
     }
 
     // Authentication

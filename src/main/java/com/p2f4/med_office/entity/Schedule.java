@@ -6,6 +6,8 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 
+import com.p2f4.med_office.utils.EnumStatusSchedule;
+
 @Getter
 @Setter
 @Entity
@@ -32,9 +34,9 @@ public class Schedule {
     @Column(name = "end_date", nullable = false)
     private LocalDate endDate;
     
-    /* 
     @Column(name = "status", nullable = false)
-    private String status; */
+    @Enumerated(EnumType.STRING)
+    private EnumStatusSchedule status;
 
     // Relations
 
