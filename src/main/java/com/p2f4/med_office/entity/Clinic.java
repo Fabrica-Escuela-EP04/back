@@ -2,6 +2,9 @@ package com.p2f4.med_office.entity;
 
 import lombok.Getter;
 import lombok.Setter;
+
+import com.p2f4.med_office.utils.EnumStatus;
+
 import jakarta.persistence.*;
 
 @Table (name = "clinics")
@@ -27,11 +30,12 @@ public class Clinic {
     private String phoneNumber;
     
     @Column(name = "status", nullable = false)
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private EnumStatus status;
 
     public Clinic() {
     }
-    public Clinic(String name, String type, String location, String phoneNumber, String status) {
+    public Clinic(String name, String type, String location, String phoneNumber, EnumStatus status) {
         this.name = name;
         this.type = type;
         this.location = location;
