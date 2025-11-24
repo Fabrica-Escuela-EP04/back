@@ -10,6 +10,8 @@ import com.p2f4.med_office.dto.*;
 import com.p2f4.med_office.entity.Clinic;
 import com.p2f4.med_office.entity.MedicalOffice;
 import com.p2f4.med_office.entity.Specialty;
+import com.p2f4.med_office.utils.EnumStatus;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -148,7 +150,7 @@ class MedicalOfficeControllerTest {
         MedicalOffice office = new MedicalOffice();
         office.setIdOffice(1);
         office.setOfficeNumber(101);
-        office.setStatus("INACTIVE");
+        office.setStatus(EnumStatus.INACTIVO);
         
         Clinic clinic = new Clinic();
         clinic.setName("Clinica Central");

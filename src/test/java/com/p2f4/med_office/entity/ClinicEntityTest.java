@@ -3,6 +3,8 @@ package com.p2f4.med_office.entity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import com.p2f4.med_office.utils.EnumStatus;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("Clinic Entity Tests")
@@ -23,7 +25,7 @@ class ClinicEntityTest {
     @DisplayName("Should create Clinic with all-args constructor")
     void testAllArgsConstructor() {
         // Arrange & Act
-        Clinic clinic = new Clinic("Hospital Central", "Public", "Downtown", "123456789", "Active");
+        Clinic clinic = new Clinic("Hospital Central", "Public", "Downtown", "123456789", EnumStatus.ACTIVO);
 
         // Assert
         assertNotNull(clinic);
@@ -106,7 +108,7 @@ class ClinicEntityTest {
         Clinic clinic = new Clinic();
 
         // Act
-        clinic.setStatus("Inactive");
+        clinic.setStatus(EnumStatus.INACTIVO);
 
         // Assert
         assertEquals("Inactive", clinic.getStatus());

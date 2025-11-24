@@ -74,12 +74,12 @@ class MedicalOfficeServiceTest {
         activeClinic = new Clinic();
         activeClinic.setIdClinic(1);
         activeClinic.setName("Clinica Central");
-        activeClinic.setStatus("ACTIVE");
+        activeClinic.setStatus(EnumStatus.ACTIVO);
 
         inactiveClinic = new Clinic();
         inactiveClinic.setIdClinic(2);
         inactiveClinic.setName("Clinica Inactiva");
-        inactiveClinic.setStatus("INACTIVE");
+        inactiveClinic.setStatus(EnumStatus.INACTIVO);
 
         specialty = new Specialty();
         specialty.setIdSpecialty(1);
@@ -90,7 +90,7 @@ class MedicalOfficeServiceTest {
         medicalOffice.setOfficeNumber(101);
         medicalOffice.setIdClinic(1);
         medicalOffice.setIdSpecialty(1);
-        medicalOffice.setStatus("ACTIVE");
+        medicalOffice.setStatus(EnumStatus.ACTIVO);
 
         medicalOfficeDTO = new MedicalOfficeDTO();
         medicalOfficeDTO.setIdOffice(1);
@@ -437,7 +437,7 @@ class MedicalOfficeServiceTest {
             Integer idMedicalOffice = 1;
             MedicalOffice activeOffice = new MedicalOffice();
             activeOffice.setIdOffice(idMedicalOffice);
-            activeOffice.setStatus("ACTIVE");
+            activeOffice.setStatus(EnumStatus.ACTIVO);
 
             when(medicalOfficeRepository.findById(idMedicalOffice)).thenReturn(Optional.of(activeOffice));
             when(medicalOfficeRepository.save(any(MedicalOffice.class))).thenAnswer(invocation -> {
