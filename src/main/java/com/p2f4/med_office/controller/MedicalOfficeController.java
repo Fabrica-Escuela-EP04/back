@@ -125,7 +125,7 @@ public class MedicalOfficeController {
                 office.getSpecialty().getSpecialtyName(),
                 office.getOfficeNumber(),
                 office.getStatus());
-        // return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+       
         return ResponseEntity.status(HttpStatus.OK).body(dto);
     }
 

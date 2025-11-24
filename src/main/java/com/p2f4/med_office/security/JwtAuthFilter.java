@@ -19,6 +19,8 @@ import com.p2f4.med_office.core.JwtService;
 import com.p2f4.med_office.domain.UserRepository;
 import com.p2f4.med_office.entity.User;
 
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -48,47 +50,75 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
 
-        if (request.getServletPath().contains("/auth")) {
+        try {
+            if (request.getServletPath().contains("/auth")) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+            
+            final Optional<String> token = getJwtFromCookie(request);
+            if (token.isEmpty()){
+                filterChain.doFilter(request, response);
+                return;
+            }
+
+            String jwtToken = token.get();
+            final String userEmail = jwtService.extractUserEmail(jwtToken);
+
+            if (userEmail == null){
+                filterChain.doFilter(request, response);
+                return; 
+            }
+
+            if (SecurityContextHolder.getContext().getAuthentication() != null){
+                filterChain.doFilter(request, response);
+                return;
+            }
+
+            final UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
+            final Optional<User> user = userRepository.findByEmail(userDetails.getUsername());
+            
+            if(user.isEmpty()){
+                filterChain.doFilter(request, response);
+                return;
+            }
+
+            if (!jwtService.isTokenValid(token.get(), user.get())) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+
+            final var authToken = new UsernamePasswordAuthenticationToken(
+                userDetails,
+                null,
+                userDetails.getAuthorities()
+            );
+
+            authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+            SecurityContextHolder.getContext().setAuthentication(authToken);
+
             filterChain.doFilter(request, response);
-            return;
-        }
-        
-        final Optional<String> token = getJwtFromCookie(request);
-        if (token.isEmpty()){
+        } catch (BadCredentialsException e) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            throw new BadCredentialsException("Invalid token");
-        }
-        String jwtToken = token.get();
-        final String userEmail = jwtService.extractUserEmail(jwtToken);
-
-        if (userEmail == null || SecurityContextHolder.getContext().getAuthentication() != null){
-            filterChain.doFilter(request, response);
-            return; 
-        }
-
-        final UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
-        final Optional<User> user = userRepository.findByEmail(userDetails.getUsername());
-        
-        if(user.isEmpty()){
-            filterChain.doFilter(request, response);
+            response.setContentType("application/json");
+            response.getWriter().write("""
+                {
+                    "title": "Invalid token",
+                    "detail": "Nombre de usuario o contraseña incorectos"
+                }
+            """);
             return;
-        }
-
-        if (!jwtService.isTokenValid(token.get(), user.get())) {
+        } catch (ExpiredJwtException e) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            throw new BadCredentialsException("Invalid token");
+            response.getWriter().write("Token expired");
+            return;
+        } catch (JwtException e) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("Invalid Token");
+        } catch (Exception e){
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.getWriter().write("Server error");
         }
-
-        final var authToken = new UsernamePasswordAuthenticationToken(
-            userDetails,
-            null,
-            userDetails.getAuthorities()
-        );
-
-        authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-        SecurityContextHolder.getContext().setAuthentication(authToken);
-
-        filterChain.doFilter(request, response);
     }
 
     private Optional<String> getJwtFromCookie(HttpServletRequest request) {

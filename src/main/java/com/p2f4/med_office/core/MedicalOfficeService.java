@@ -53,6 +53,7 @@ public class MedicalOfficeService {
     public List<MedicalOfficeDataUpdatableDTO> mergeMedicalOfficesWithSchedules(List<MedicalOfficeParamsDTO> medicalOffices, List<ScheduleDTO> schedules) {
         return medicalOffices.stream().map(medicalOffice -> {
             MedicalOfficeDataUpdatableDTO updatableDTO = new MedicalOfficeDataUpdatableDTO();
+            updatableDTO.setIdOffice(medicalOffice.getIdOffice());
             updatableDTO.setOfficeNumber(medicalOffice.getOfficeNumber());
             updatableDTO.setClinicName(medicalOffice.getClinicName());
             updatableDTO.setSpecialtyName(medicalOffice.getSpecialtyName());
@@ -168,7 +169,7 @@ public class MedicalOfficeService {
         boolean alreadyExists = medicalOfficeRepository.existsByIdClinicAndOfficeNumber(clinic.getIdClinic(),
                 officeNumber);
         boolean changedNumber = oldMedicalOffice.getOfficeNumber() == officeNumber;
-        if (alreadyExists && !changedNumber) {
+        if (alreadyExists && changedNumber) {
             throw new OfficeNumberDuplicateException();
         }
         // Update medical office details

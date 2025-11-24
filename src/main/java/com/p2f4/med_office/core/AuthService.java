@@ -98,7 +98,7 @@ public class AuthService {
         String userEmail = jwtService.extractUserEmail(refreshToken);
 
         if(userEmail == null){
-            throw new IllegalArgumentException("Invalid Refrehs Token");
+            throw new IllegalArgumentException("Invalid Refresh Token");
         }
         User user = userRepository.findByEmail(userEmail).orElseThrow(UserNotFoundException::new);
 

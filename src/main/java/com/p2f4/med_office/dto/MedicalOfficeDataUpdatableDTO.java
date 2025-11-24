@@ -7,6 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class MedicalOfficeDataUpdatableDTO {
+    private Integer idOffice;
     private Integer idUser;
     private Integer officeNumber;
     private String ClinicName;
@@ -19,7 +20,8 @@ public class MedicalOfficeDataUpdatableDTO {
     public MedicalOfficeDataUpdatableDTO() {
     }
 
-    public MedicalOfficeDataUpdatableDTO(Integer idUser, Integer officeNumber, String ClinicName, String SpecialtyName, String status, LocalDate startDate, LocalDate endDate) {
+    public MedicalOfficeDataUpdatableDTO(Integer idOffice, Integer idUser, Integer officeNumber, String ClinicName, String SpecialtyName, String status, LocalDate startDate, LocalDate endDate) {
+        this.idOffice = idOffice;
         this.idUser = idUser;
         this.officeNumber = officeNumber;
         this.ClinicName = ClinicName;
