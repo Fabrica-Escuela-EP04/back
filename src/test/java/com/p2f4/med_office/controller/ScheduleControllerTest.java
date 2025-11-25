@@ -66,7 +66,7 @@ class ScheduleControllerTest {
     void shouldCreateMaintenanceScheduleSuccessfully() throws Exception {
         // Arrange
         when(scheduleService.createMaintenanceSchedule(
-            anyInt(), anyString(), anyInt(), any(LocalDate.class), any(LocalDate.class)
+            anyInt(), anyInt(), any(LocalDate.class), any(LocalDate.class)
         )).thenReturn(scheduleDTO);
 
         // Act & Assert
@@ -91,7 +91,7 @@ class ScheduleControllerTest {
         scheduleDTO.setEndDate(endDate);
         
         when(scheduleService.createMaintenanceSchedule(
-            anyInt(), anyString(), anyInt(), any(LocalDate.class), any(LocalDate.class)
+            anyInt(), anyInt(), any(LocalDate.class), any(LocalDate.class)
         )).thenReturn(scheduleDTO);
 
         // Act & Assert
@@ -112,7 +112,7 @@ class ScheduleControllerTest {
         scheduleDTO.setIdOffice(202);
         
         when(scheduleService.createMaintenanceSchedule(
-            anyInt(), anyString(), anyInt(), any(LocalDate.class), any(LocalDate.class)
+            anyInt(), anyInt(), any(LocalDate.class), any(LocalDate.class)
         )).thenReturn(scheduleDTO);
 
         // Act & Assert

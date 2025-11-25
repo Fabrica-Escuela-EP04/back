@@ -44,10 +44,11 @@ class ScheduleDTOTest {
         LocalDate expectedStartDate = LocalDate.of(2025, 1, 15);
         LocalDate expectedEndDate = LocalDate.of(2025, 1, 20);
 
+        String expectedStatus = "ACTIVO";
+
         // Act
         ScheduleDTO dto = new ScheduleDTO(expectedIdSchedule, expectedIdUser, expectedType,
-                                          expectedIdOffice, expectedStartDate, expectedEndDate);
-
+                                          expectedIdOffice, expectedStartDate, expectedEndDate, expectedStatus);
         // Assert
         assertNotNull(dto);
         assertEquals(expectedIdSchedule, dto.getIdSchedule());
@@ -56,6 +57,7 @@ class ScheduleDTOTest {
         assertEquals(expectedIdOffice, dto.getIdOffice());
         assertEquals(expectedStartDate, dto.getStartDate());
         assertEquals(expectedEndDate, dto.getEndDate());
+        assertEquals(expectedStatus, dto.getStatus());
     }
 
     @Test
@@ -147,7 +149,7 @@ class ScheduleDTOTest {
     void shouldHandleNullValuesInSetters() {
         // Arrange
         ScheduleDTO dto = new ScheduleDTO(1, 100, "MAINTENANCE", 201,
-                                          LocalDate.now(), LocalDate.now().plusDays(5));
+                                          LocalDate.now(), LocalDate.now().plusDays(5), "ACTIVO");
 
         // Act
         dto.setIdSchedule(null);
@@ -156,6 +158,7 @@ class ScheduleDTOTest {
         dto.setIdOffice(null);
         dto.setStartDate(null);
         dto.setEndDate(null);
+        dto.setStatus(null);
 
         // Assert
         assertNull(dto.getIdSchedule());
@@ -164,6 +167,7 @@ class ScheduleDTOTest {
         assertNull(dto.getIdOffice());
         assertNull(dto.getStartDate());
         assertNull(dto.getEndDate());
+        assertNull(dto.getStatus());
     }
 
     @Test

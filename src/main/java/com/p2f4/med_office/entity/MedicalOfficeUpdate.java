@@ -16,11 +16,11 @@ public class MedicalOfficeUpdate {
     private Integer idModification;
 
     @ManyToOne
-    @JoinColumn(name = "id_office", insertable = false, updatable = false)
+    @JoinColumn(name = "id_office")
     private MedicalOffice idOffice;
 
     @ManyToOne
-    @JoinColumn(name = "id_user", insertable = false, updatable = false)
+    @JoinColumn(name = "id_user")
     private User idUser;
     
     @Column(name = "modification_date", nullable = false)

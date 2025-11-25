@@ -10,18 +10,20 @@ public class ScheduleDTO {
     private Integer idOffice;
     private LocalDate startDate;
     private LocalDate endDate;
+    private String status;
 
     public ScheduleDTO(){
     }
 
     public ScheduleDTO(Integer idSchedule, Integer idUser, String type, Integer idOffice, LocalDate startDate,
-            LocalDate endDate) {
+            LocalDate endDate, String status) {
         this.idSchedule = idSchedule;
         this.idUser = idUser;
         this.type = type;
         this.idOffice = idOffice;
         this.startDate = startDate;
         this.endDate = endDate;
+        this.status = status;
     }
 
     public Integer getIdSchedule() {
@@ -72,5 +74,12 @@ public class ScheduleDTO {
         this.endDate = endDate;
     }
 
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
 
 }
