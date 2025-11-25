@@ -21,6 +21,7 @@ import com.p2f4.med_office.dto.ClinicDTO;
 import com.p2f4.med_office.dto.SpecialtyDTO;
 import com.p2f4.med_office.entity.MedicalOffice;
 
+
 import java.util.List;
 
 import jakarta.validation.Valid;
@@ -124,7 +125,8 @@ public class MedicalOfficeController {
                 office.getClinic().getName(),
                 office.getSpecialty().getSpecialtyName(),
                 office.getOfficeNumber(),
-                office.getStatus());
+                office.getStatus().name()
+            );
         // return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
         return ResponseEntity.status(HttpStatus.OK).body(dto);
     }

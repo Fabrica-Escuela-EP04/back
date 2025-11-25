@@ -16,7 +16,7 @@ import com.p2f4.med_office.entity.User;
 import com.p2f4.med_office.security.CustomAuthenticationProvider;
 import com.p2f4.med_office.utils.UserNotFoundException;
 
-@Configuration(proxyBeanMethods=false)
+@Configuration
 public class ApiConfiguration {
     private static final String COMMON_PATH = "/api";
     private static final String API_VERSION = "/v1";

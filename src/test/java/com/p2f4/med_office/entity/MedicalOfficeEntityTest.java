@@ -3,6 +3,8 @@ package com.p2f4.med_office.entity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import com.p2f4.med_office.utils.EnumStatus;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("MedicalOffice Entity Tests")
@@ -110,7 +112,7 @@ class MedicalOfficeEntityTest {
         MedicalOffice office = new MedicalOffice();
 
         // Act
-        office.setStatus("Active");
+        office.setStatus(EnumStatus.ACTIVO);
 
         // Assert
         assertEquals("Active", office.getStatus());

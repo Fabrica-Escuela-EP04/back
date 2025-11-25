@@ -25,8 +25,7 @@ public class ClinicService {
 
     public List<ClinicDTO> getAllClinics(){
         return this.clinicRepository.findAll().stream()
-        .map(this.clinicMapper::toDTO).toList();
-
+                .map(this.clinicMapper::toDTO).toList();
     }
 
 }

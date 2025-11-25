@@ -10,6 +10,7 @@ import com.p2f4.med_office.dto.LoginResponse;
 import com.p2f4.med_office.utils.UserNotFoundException;
 import com.p2f4.med_office.utils.UserRoleNotFoundException;
 import com.p2f4.med_office.utils.DuplicatedUserException;
+import com.p2f4.med_office.utils.InsecurePasswordException;
 
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
@@ -77,35 +78,35 @@ public class AuthService {
     /**
      * Validates password strength according to security best practices
      * @param password The password to validate
-     * @throws IllegalArgumentException if password doesn't meet requirements
+     * @throws InsecurePasswordException if password doesn't meet requirements
      */
     private void validatePasswordStrength(String password) {
         if (password == null || password.trim().isEmpty()) {
-            throw new IllegalArgumentException("La contraseña no puede estar vacía");
+            throw new InsecurePasswordException("La contraseña no puede estar vacía");
         }
         
         if (password.length() < 8) {
-            throw new IllegalArgumentException("La contraseña debe tener al menos 8 caracteres");
+            throw new InsecurePasswordException("La contraseña debe tener al menos 8 caracteres");
         }
         
         // Check for at least one uppercase letter
         if (!password.matches(".*[A-Z].*")) {
-            throw new IllegalArgumentException("La contraseña debe contener al menos una letra mayúscula");
+            throw new InsecurePasswordException("La contraseña debe contener al menos una letra mayúscula");
         }
         
         // Check for at least one lowercase letter
         if (!password.matches(".*[a-z].*")) {
-            throw new IllegalArgumentException("La contraseña debe contener al menos una letra minúscula");
+            throw new InsecurePasswordException("La contraseña debe contener al menos una letra minúscula");
         }
         
         // Check for at least one digit
         if (!password.matches(".*\\d.*")) {
-            throw new IllegalArgumentException("La contraseña debe contener al menos un número");
+            throw new InsecurePasswordException("La contraseña debe contener al menos un número");
         }
         
         // Check for at least one special character
         if (!password.matches(".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?].*")) {
-            throw new IllegalArgumentException("La contraseña debe contener al menos un carácter especial (!@#$%^&*()_+-=[]{}...)");
+            throw new InsecurePasswordException("La contraseña debe contener al menos un carácter especial (!@#$%^&*()_+-=[]{}...)");
         }
         
         // Check for common weak passwords
@@ -113,7 +114,7 @@ public class AuthService {
         String lowerPassword = password.toLowerCase();
         for (String weak : weakPasswords) {
             if (lowerPassword.contains(weak)) {
-                throw new IllegalArgumentException("La contraseña es demasiado común o predecible");
+                throw new InsecurePasswordException("La contraseña es demasiado común o predecible");
             }
         }
     }
@@ -145,7 +146,7 @@ public class AuthService {
         String userEmail = jwtService.extractUserEmail(refreshToken);
 
         if(userEmail == null){
-            throw new IllegalArgumentException("Invalid Refrehs Token");
+            throw new IllegalArgumentException("Invalid Refresh Token");
         }
         User user = userRepository.findByEmail(userEmail).orElseThrow(UserNotFoundException::new);
 

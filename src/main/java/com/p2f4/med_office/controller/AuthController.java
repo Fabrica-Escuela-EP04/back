@@ -5,6 +5,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,11 +17,15 @@ import com.p2f4.med_office.core.AuthService;
 import com.p2f4.med_office.dto.LoggedUserDTO;
 import com.p2f4.med_office.dto.LoginRequest;
 import com.p2f4.med_office.dto.LoginResponse;
-import com.p2f4.med_office.dto.RefreshTokenRequest;
 import com.p2f4.med_office.dto.UserDTO;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+
+import java.util.Arrays;
+import java.util.Optional;
 
 @RestController
 @RequestMapping(API_BASE_PATH + "/auth")
@@ -69,7 +74,7 @@ public class AuthController {
         ResponseCookie accessCookie = ResponseCookie.from(authCookieName, loginResponse.getToken())
             .httpOnly(true)
             .secure(true)
-            .sameSite("None")
+            .sameSite("None") 
             .path("/")
             .maxAge(jwtExpiration.intValue() / 1000)
             .build();
@@ -90,10 +95,16 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<LoggedUserDTO> refreshToken(@RequestBody RefreshTokenRequest request,
-            HttpServletResponse response) {
-
-        LoginResponse loginResponse = authService.refreshToken(request.getRefreshToken());
+    public ResponseEntity<LoggedUserDTO> refreshToken(HttpServletRequest request, HttpServletResponse response) {
+        
+        final Optional<String> token = getTokenFromCookie(request, refreshCokieName);
+        if (token.isEmpty()){
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            throw new BadCredentialsException("Invalid token");
+        }
+        String refreshToken = token.get();
+        
+        LoginResponse loginResponse = authService.refreshToken(refreshToken);
 
         ResponseCookie accessCookie = ResponseCookie.from("access_token", loginResponse.getToken())
             .httpOnly(true)
@@ -122,7 +133,7 @@ public class AuthController {
             .httpOnly(true)
             .secure(true)
             .sameSite("None")
-            .path("/api/auth/refresh")
+            .path(REFRESH_URL)
             .maxAge(0)
             .build();
 
@@ -130,6 +141,17 @@ public class AuthController {
         response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
 
         return ResponseEntity.noContent().build();
+    }
+
+    private Optional<String> getTokenFromCookie(HttpServletRequest request, String tokenName) {
+        final Cookie[] cookies = request.getCookies();
+        if (cookies == null || cookies.length == 0) {
+            return Optional.empty();
+        }
+        return (Arrays.stream(cookies)
+            .filter(cookie -> cookie.getName().equals(tokenName))
+            .map(Cookie::getValue)
+            .findFirst());
     }
 
 }

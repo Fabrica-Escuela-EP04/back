@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 
 import com.p2f4.med_office.dto.ScheduleDTO;
 import com.p2f4.med_office.mapper.ScheduleMapper;
-//import com.p2f4.med_office.utils.ActiveScheduleException;
+import com.p2f4.med_office.utils.EnumStatusSchedule;
 import com.p2f4.med_office.utils.NonCoungruentDatesException;
 import com.p2f4.med_office.utils.NullDateException;
 import com.p2f4.med_office.domain.ScheduleRepository;
@@ -29,13 +29,8 @@ public class ScheduleService {
                 .toList();
     }
     // Creates a maintenance schedule
-    public ScheduleDTO createMaintenanceSchedule(Integer idUser, String type, Integer idOffice, LocalDate startDate, LocalDate endDate) {
-        // Validation if exists active maintainance schedule
-        /* 
-        if (scheduleRepository.existsActiveSchedule(idOffice, "ACTIVE")){
-            throw new ActiveScheduleException();
-        }
-        */
+    public ScheduleDTO createMaintenanceSchedule(Integer idUser, Integer idOffice, LocalDate startDate, LocalDate endDate) {
+
         // Validation Date not null and startDate before endDate
         if (startDate == null || endDate == null) {
             throw new NullDateException();
@@ -43,6 +38,9 @@ public class ScheduleService {
         if (endDate.isBefore(startDate)) {
             throw new NonCoungruentDatesException();
         }
+        // Set maintenance schedule data
+        String type = "MANTENIMIENTO";
+        String status = EnumStatusSchedule.PROGRAMADO.name();
 
         // Create and return the ScheduleDTO
         ScheduleDTO scheduleDTO = new ScheduleDTO();
@@ -51,6 +49,7 @@ public class ScheduleService {
         scheduleDTO.setIdOffice(idOffice);
         scheduleDTO.setStartDate(startDate);
         scheduleDTO.setEndDate(endDate);
+        scheduleDTO.setStatus(status);
         //Mapping DTO to Entity
         var entity = ScheduleMapper.INSTANCE.toEntity(scheduleDTO);
         scheduleRepository.save(entity);

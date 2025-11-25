@@ -19,7 +19,6 @@ public class CustomAuthenticationProvider extends DaoAuthenticationProvider {
         String presentedPassword = authentication.getCredentials().toString();
 
         if (!getPasswordEncoder().matches(presentedPassword, userDetails.getPassword())) {
-            // Aquí lanzas tu excepción customizada
             throw new InvalidPasswordException();
         }
     }

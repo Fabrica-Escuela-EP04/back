@@ -1,6 +1,6 @@
 package com.p2f4.med_office.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class UserDTO {
 
@@ -8,7 +8,7 @@ public class UserDTO {
     private String name;
     private String lastName;
     private String email;
-    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
     private String document;
     private String documentType;

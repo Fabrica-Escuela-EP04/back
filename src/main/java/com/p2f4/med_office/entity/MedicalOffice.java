@@ -1,5 +1,7 @@
 package com.p2f4.med_office.entity;
 
+import com.p2f4.med_office.utils.EnumStatus;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -32,6 +34,7 @@ public class MedicalOffice {
   private Integer officeNumber;
 
   @Column(name = "status", nullable = false)
-  private String status;
+  @Enumerated(EnumType.STRING)
+  private EnumStatus status;
 }
 
