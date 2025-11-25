@@ -28,19 +28,23 @@ public class MedicalOfficeService {
     private final SpecialtyRepository specialtyRepository;
     private final MedicalOfficeMapper medicalOfficeMapper;
     private final ScheduleService scheduleService;
+    private final MedicalOfficeUpdateService medicalOfficeUpdateService;
 
     public MedicalOfficeService(
         MedicalOfficeRepository medicalOfficeRepository,
         ClinicRepository clinicRepository,
         SpecialtyRepository specialtyRepository,
         MedicalOfficeMapper medicalOfficeMapper,
-        ScheduleService scheduleService){
+        ScheduleService scheduleService,
+        MedicalOfficeUpdateService medicalOfficeUpdateService
+    ){
 
         this.medicalOfficeRepository = medicalOfficeRepository;
         this.clinicRepository = clinicRepository;
         this.medicalOfficeMapper = medicalOfficeMapper;
         this.specialtyRepository = specialtyRepository;
         this.scheduleService = scheduleService;
+        this.medicalOfficeUpdateService = medicalOfficeUpdateService;
     }
 
     // Get all medical offices only with own parameters
@@ -136,25 +140,30 @@ public class MedicalOfficeService {
     }
 
     // Updates a medical office using a office number, the names for the specialty, the name for the clinic and the status
-    public MedicalOfficeDTO updateMedicalOffice(Integer idUser, Integer idMedicalOffice, Integer officeNumber, String clinicName, String specialtyName, String status, LocalDate startDate, LocalDate endDate) {
+    public MedicalOfficeDTO updateMedicalOffice(
+        Integer idUser, 
+        Integer idMedicalOffice, 
+        Integer officeNumber, 
+        String clinicName, 
+        String specialtyName, 
+        String status, 
+        LocalDate startDate, 
+        LocalDate endDate) {
  
         // Verify medical office, clinic and specialty existence
-        MedicalOffice oldMedicalOffice = medicalOfficeRepository.findById(idMedicalOffice)
-                .orElseThrow(MedicalOfficeNotFoundException::new);
+        MedicalOffice oldMedicalOffice = medicalOfficeRepository.findById(idMedicalOffice).orElseThrow(MedicalOfficeNotFoundException::new);
         Clinic clinic = clinicRepository.findByNameIgnoreCase(clinicName).orElseThrow(ClinicNotFoundException::new);
-        System.out.println("Buscando especialidad con nombre: [" + specialtyName + "]");
-        Specialty specialty = specialtyRepository.findBySpecialtyNameIgnoreCase(specialtyName)
-                .orElseThrow(SpecialtyNotFoundException::new);
+        Specialty specialty = specialtyRepository.findBySpecialtyNameIgnoreCase(specialtyName).orElseThrow(SpecialtyNotFoundException::new);
+
         // Check clinic status
         if (EnumStatus.ACTIVO != clinic.getStatus()) {
             throw new ClinicInactiveException();
         }
 
         // If status is MANTENIMIENTO, create maintenance schedule
-        if(status == "MANTENIMIENTO" ){
+        if(status.equalsIgnoreCase("MANTENIMIENTO") ){
             scheduleService.createMaintenanceSchedule(
                 idUser,
-                "MANTENIMIENTO",
                 oldMedicalOffice.getIdOffice(),
                 startDate,
                 endDate
@@ -171,6 +180,21 @@ public class MedicalOfficeService {
         if (alreadyExists && !changedNumber) {
             throw new OfficeNumberDuplicateException();
         }
+
+        // Log the update
+        medicalOfficeUpdateService.insertUpdateLog(
+            idUser,
+            idMedicalOffice,
+            oldMedicalOffice.getClinic().getName(),
+            clinicName,
+            oldMedicalOffice.getSpecialty().getSpecialtyName(),
+            specialtyName,
+            oldMedicalOffice.getStatus().name(),
+            normalizedStatus,
+            oldMedicalOffice.getOfficeNumber(),
+            officeNumber
+        );
+
         // Update medical office details
         oldMedicalOffice.setOfficeNumber(officeNumber);
         oldMedicalOffice.setIdClinic(clinic.getIdClinic());

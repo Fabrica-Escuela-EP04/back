@@ -114,7 +114,7 @@ class ScheduleServiceTest {
             when(scheduleRepository.save(any(Schedule.class))).thenReturn(savedSchedule);
 
             // Act
-            ScheduleDTO result = scheduleService.createMaintenanceSchedule(idUser, type, idOffice, startDate, endDate);
+            ScheduleDTO result = scheduleService.createMaintenanceSchedule(idUser, idOffice, startDate, endDate);
 
             // Assert
             assertNotNull(result, "Result should not be null");
@@ -131,14 +131,14 @@ class ScheduleServiceTest {
         void shouldThrowNullDateExceptionWhenStartDateIsNull() {
             // Arrange
             Integer idUser = 1;
-            String type = "MAINTENANCE";
+            //String type = "MAINTENANCE";
             Integer idOffice = 1;
             LocalDate startDate = null;
             LocalDate endDate = LocalDate.of(2025, 1, 10);
 
             // Act & Assert
             assertThrows(NullDateException.class, () -> {
-                scheduleService.createMaintenanceSchedule(idUser, type, idOffice, startDate, endDate);
+                scheduleService.createMaintenanceSchedule(idUser, idOffice, startDate, endDate);
             }, "Should throw NullDateException when startDate is null");
 
             verify(scheduleRepository, never()).save(any(Schedule.class));
@@ -149,14 +149,13 @@ class ScheduleServiceTest {
         void shouldThrowNullDateExceptionWhenEndDateIsNull() {
             // Arrange
             Integer idUser = 1;
-            String type = "MAINTENANCE";
             Integer idOffice = 1;
             LocalDate startDate = LocalDate.of(2025, 1, 1);
             LocalDate endDate = null;
 
             // Act & Assert
             assertThrows(NullDateException.class, () -> {
-                scheduleService.createMaintenanceSchedule(idUser, type, idOffice, startDate, endDate);
+                scheduleService.createMaintenanceSchedule(idUser, idOffice, startDate, endDate);
             }, "Should throw NullDateException when endDate is null");
 
             verify(scheduleRepository, never()).save(any(Schedule.class));
@@ -167,14 +166,13 @@ class ScheduleServiceTest {
         void shouldThrowNullDateExceptionWhenBothDatesAreNull() {
             // Arrange
             Integer idUser = 1;
-            String type = "MAINTENANCE";
             Integer idOffice = 1;
             LocalDate startDate = null;
             LocalDate endDate = null;
 
             // Act & Assert
             assertThrows(NullDateException.class, () -> {
-                scheduleService.createMaintenanceSchedule(idUser, type, idOffice, startDate, endDate);
+                scheduleService.createMaintenanceSchedule(idUser,  idOffice, startDate, endDate);
             }, "Should throw NullDateException when both dates are null");
 
             verify(scheduleRepository, never()).save(any(Schedule.class));
@@ -185,14 +183,13 @@ class ScheduleServiceTest {
         void shouldThrowNonCoungruentDatesExceptionWhenEndDateIsBeforeStartDate() {
             // Arrange
             Integer idUser = 1;
-            String type = "MAINTENANCE";
             Integer idOffice = 1;
             LocalDate startDate = LocalDate.of(2025, 1, 10);
             LocalDate endDate = LocalDate.of(2025, 1, 1);
 
             // Act & Assert
             assertThrows(NonCoungruentDatesException.class, () -> {
-                scheduleService.createMaintenanceSchedule(idUser, type, idOffice, startDate, endDate);
+                scheduleService.createMaintenanceSchedule(idUser,  idOffice, startDate, endDate);
             }, "Should throw NonCoungruentDatesException when endDate is before startDate");
 
             verify(scheduleRepository, never()).save(any(Schedule.class));
@@ -218,7 +215,7 @@ class ScheduleServiceTest {
             when(scheduleRepository.save(any(Schedule.class))).thenReturn(savedSchedule);
 
             // Act
-            ScheduleDTO result = scheduleService.createMaintenanceSchedule(idUser, type, idOffice, sameDate, sameDate);
+            ScheduleDTO result = scheduleService.createMaintenanceSchedule(idUser, idOffice, sameDate, sameDate);
 
             // Assert
             assertNotNull(result, "Result should not be null");
@@ -249,7 +246,7 @@ class ScheduleServiceTest {
             when(scheduleRepository.save(any(Schedule.class))).thenReturn(savedSchedule);
 
             // Act
-            ScheduleDTO result = scheduleService.createMaintenanceSchedule(idUser, type, idOffice, startDate, endDate);
+            ScheduleDTO result = scheduleService.createMaintenanceSchedule(idUser, idOffice, startDate, endDate);
 
             // Assert
             assertNotNull(result, "Result should not be null");

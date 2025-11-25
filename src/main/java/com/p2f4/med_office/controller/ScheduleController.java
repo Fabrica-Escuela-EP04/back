@@ -28,7 +28,6 @@ public class ScheduleController {
 
         ScheduleDTO created = scheduleService.createMaintenanceSchedule(
                 request.getIdUser(),
-                request.getType(),
                 request.getIdOffice(),
                 request.getStartDate(),
                 request.getEndDate()

@@ -371,7 +371,7 @@ class MedicalOfficeServiceTest {
             // ASSERT
             assertNotNull(result, "El resultado no debe ser nulo");
             verify(scheduleService, times(1)).createMaintenanceSchedule(
-                    eq(idUser), eq("MANTENIMIENTO"), eq(medicalOffice.getIdOffice()), eq(startDate), eq(endDate));
+                    eq(idUser),  eq(medicalOffice.getIdOffice()), eq(startDate), eq(endDate));
         }
 
         @Test
