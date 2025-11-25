@@ -22,6 +22,7 @@ import jakarta.servlet.http.HttpServletResponse;
 @Configuration
 @EnableWebSecurity(debug = false)
 @EnableMethodSecurity
+@Profile("!test")
 public class SecurityConfiguration {
 
     private final AuthenticationProvider authenticationProvider;

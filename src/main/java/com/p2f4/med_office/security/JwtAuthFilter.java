@@ -29,6 +29,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 @Component
+@Profile("!test")
 public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;

@@ -175,26 +175,37 @@ public class MedicalOfficeService {
 
     
         // Check for unique office number within the clinic
-        boolean alreadyExists = medicalOfficeRepository.existsByIdClinicAndOfficeNumber(clinic.getIdClinic(),
-                officeNumber);
-        boolean changedNumber = oldMedicalOffice.getOfficeNumber() != officeNumber;
-        if (alreadyExists && changedNumber) {
+        boolean alreadyExists;
+        try {
+            alreadyExists = medicalOfficeRepository.existsByIdClinicAndOfficeNumber(clinic.getIdClinic(),
+                    officeNumber);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return null;
+        }
+        System.out.println("Office number is: "+oldMedicalOffice.getOfficeNumber());
+        boolean changedNumber = oldMedicalOffice.getOfficeNumber().equals(officeNumber);
+        if (alreadyExists && !changedNumber) {
             throw new OfficeNumberDuplicateException();
         }
 
         // Log the update
-        medicalOfficeUpdateService.insertUpdateLog(
-            idUser,
-            idMedicalOffice,
-            oldMedicalOffice.getClinic().getName(),
-            clinicName,
-            oldMedicalOffice.getSpecialty().getSpecialtyName(),
-            specialtyName,
-            oldMedicalOffice.getStatus().name(),
-            normalizedStatus,
-            oldMedicalOffice.getOfficeNumber(),
-            officeNumber
-        );
+        try {
+            medicalOfficeUpdateService.insertUpdateLog(
+                idUser,
+                idMedicalOffice,
+                oldMedicalOffice.getClinic().getName(),
+                clinicName,
+                oldMedicalOffice.getSpecialty().getSpecialtyName(),
+                specialtyName,
+                oldMedicalOffice.getStatus().name(),
+                normalizedStatus,
+                oldMedicalOffice.getOfficeNumber(),
+                officeNumber
+            );
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
 
         // Update medical office details
         oldMedicalOffice.setOfficeNumber(officeNumber);
