@@ -22,7 +22,6 @@ import jakarta.servlet.http.HttpServletResponse;
 @Configuration
 @EnableWebSecurity(debug = false)
 @EnableMethodSecurity
-@Profile("!test")
 public class SecurityConfiguration {
 
     private final AuthenticationProvider authenticationProvider;
@@ -33,7 +32,9 @@ public class SecurityConfiguration {
         this.jwtAuthFilter = jwtAuthFilter;
     }
 
-    public final static String LOGIN_URL_MATCHER = ApiConfiguration.API_BASE_PATH + "/auth/**";
+    public final static String LOGIN_URL_MATCHER = ApiConfiguration.API_BASE_PATH + "/auth/login";
+    public final static String REFRESH_URL_MATCHER = ApiConfiguration.API_BASE_PATH + "/auth/refresh";
+    public final static String REGISTER_URL_MATCHER = ApiConfiguration.API_BASE_PATH + "/auth/register";
     public final static String LOG_OUT_URL_MATCHER = ApiConfiguration.API_BASE_PATH + "/auth/logout";
     final String BASE_URL_MATCHER = ApiConfiguration.API_BASE_PATH + "/**";
 
@@ -44,7 +45,9 @@ public class SecurityConfiguration {
             .formLogin(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(requests -> requests
                 .requestMatchers(HttpMethod.POST, LOGIN_URL_MATCHER).permitAll()
-                .requestMatchers(LOG_OUT_URL_MATCHER).authenticated()
+                .requestMatchers(HttpMethod.POST, REFRESH_URL_MATCHER).permitAll()
+                .requestMatchers(HttpMethod.POST, REGISTER_URL_MATCHER).authenticated()
+                .requestMatchers(HttpMethod.POST, LOG_OUT_URL_MATCHER).authenticated()
                 .requestMatchers(BASE_URL_MATCHER).authenticated()
                 .anyRequest().denyAll()
             )

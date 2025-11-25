@@ -18,15 +18,11 @@ import com.p2f4.med_office.dto.LoggedUserDTO;
 import com.p2f4.med_office.dto.LoginRequest;
 import com.p2f4.med_office.dto.LoginResponse;
 import com.p2f4.med_office.dto.UserDTO;
-import com.p2f4.med_office.dto.LoggedUserDTO;
-import com.p2f4.med_office.dto.LoginRequest;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-
-import static com.p2f4.med_office.config.ApiConfiguration.API_BASE_PATH;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -77,8 +73,8 @@ public class AuthController {
         // Access token
         ResponseCookie accessCookie = ResponseCookie.from(authCookieName, loginResponse.getToken())
             .httpOnly(true)
-            .secure(false)
-            .sameSite("Lax") 
+            .secure(true)
+            .sameSite("None") 
             .path("/")
             .maxAge(jwtExpiration.intValue() / 1000)
             .build();
@@ -137,7 +133,7 @@ public class AuthController {
             .httpOnly(true)
             .secure(true)
             .sameSite("None")
-            .path("/api/auth/refresh")
+            .path(REFRESH_URL)
             .maxAge(0)
             .build();
 

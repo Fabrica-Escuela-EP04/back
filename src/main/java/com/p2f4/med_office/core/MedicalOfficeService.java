@@ -168,7 +168,7 @@ public class MedicalOfficeService {
         // Check for unique office number within the clinic
         boolean alreadyExists = medicalOfficeRepository.existsByIdClinicAndOfficeNumber(clinic.getIdClinic(),
                 officeNumber);
-        boolean changedNumber = oldMedicalOffice.getOfficeNumber() == officeNumber;
+        boolean changedNumber = oldMedicalOffice.getOfficeNumber() != officeNumber;
         if (alreadyExists && changedNumber) {
             throw new OfficeNumberDuplicateException();
         }

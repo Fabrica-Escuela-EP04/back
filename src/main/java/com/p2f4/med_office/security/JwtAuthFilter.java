@@ -29,7 +29,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 @Component
-@Profile("!test")
 public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
@@ -53,7 +52,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
 
         try {
-            if (request.getServletPath().contains("/auth")) {
+            if (request.getServletPath().contains("/auth/login")) {
                 filterChain.doFilter(request, response);
                 return;
             }
