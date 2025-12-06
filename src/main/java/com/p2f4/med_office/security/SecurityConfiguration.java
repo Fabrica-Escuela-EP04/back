@@ -45,6 +45,11 @@ public class SecurityConfiguration {
         http
             .formLogin(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(requests -> requests
+                .requestMatchers("/explorer/**").permitAll()
+                .requestMatchers("/v3/api-docs/**").permitAll()
+                .requestMatchers("/swagger-ui/**").permitAll()
+                .requestMatchers("/swagger-ui.html").permitAll()
+                .requestMatchers("/actuator/prometheus/**").permitAll()
                 .requestMatchers(HttpMethod.POST, LOGIN_URL_MATCHER).permitAll()
                 .requestMatchers(HttpMethod.POST, REFRESH_URL_MATCHER).permitAll()
                 .requestMatchers(HttpMethod.POST, REGISTER_URL_MATCHER).authenticated()

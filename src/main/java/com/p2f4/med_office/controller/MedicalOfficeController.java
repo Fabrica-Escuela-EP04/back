@@ -23,13 +23,11 @@ import com.p2f4.med_office.entity.MedicalOffice;
 
 
 import java.util.List;
-
 import jakarta.validation.Valid;
 
-import static com.p2f4.med_office.config.ApiConfiguration.API_BASE_PATH;
 
 @RestController
-@RequestMapping(API_BASE_PATH + "/medical-offices")
+@RequestMapping("/api/v1/medical-offices")
 public class MedicalOfficeController {
 
     private final MedicalOfficeService medicalOfficeService;

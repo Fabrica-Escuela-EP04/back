@@ -13,7 +13,7 @@ import com.p2f4.med_office.dto.ScheduleDTO;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/schedules")
+@RequestMapping("/api/v1/schedules")
 public class ScheduleController {
 
     private final ScheduleService scheduleService;

@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.p2f4.med_office.config.ApiConfiguration;
-import static com.p2f4.med_office.config.ApiConfiguration.API_BASE_PATH;
 import com.p2f4.med_office.core.AuthService;
 import com.p2f4.med_office.dto.LoggedUserDTO;
 import com.p2f4.med_office.dto.LoginRequest;
@@ -28,7 +27,7 @@ import java.util.Arrays;
 import java.util.Optional;
 
 @RestController
-@RequestMapping(API_BASE_PATH + "/auth")
+@RequestMapping("/api/v1/auth")
 public class AuthController {
 
     private final AuthService authService;

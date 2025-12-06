@@ -53,6 +53,17 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
 
         try {
+
+            String path = request.getServletPath();
+            if (path.startsWith("/v3/api-docs") ||
+                path.startsWith("/swagger-ui") ||
+                path.startsWith("/swagger-ui.html") ||
+                path.startsWith("/actuator/prometheus")) {
+
+                filterChain.doFilter(request, response);
+                return;
+            }       
+
             if (request.getServletPath().contains("/auth/login")) {
                 filterChain.doFilter(request, response);
                 return;

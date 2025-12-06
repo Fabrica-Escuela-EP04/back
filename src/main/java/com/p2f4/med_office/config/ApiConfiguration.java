@@ -1,5 +1,6 @@
 package com.p2f4.med_office.config;
 
+import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -52,6 +53,11 @@ public class ApiConfiguration {
         DaoAuthenticationProvider authProvider = new CustomAuthenticationProvider();
         authProvider.setUserDetailsService(userDetailService());
         authProvider.setPasswordEncoder(passwordEncoder());
+        try {
+            authProvider.afterPropertiesSet();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return authProvider;
     }
 
@@ -71,6 +77,14 @@ public class ApiConfiguration {
         .title("API de CITASalud para Gestión de Consultorios Médicos ")
         .version("1.0")
         .description("Documentación de la API de CITASalud para la gestión de consultorios médicos, especialidades, clínicas y cronogramas."));
+    }
+
+    @Bean
+    public GroupedOpenApi apiGroup() {
+        return GroupedOpenApi.builder()
+            .group("v1")
+            .pathsToMatch("/api/v1/**")
+            .build();
     }
     
 }
