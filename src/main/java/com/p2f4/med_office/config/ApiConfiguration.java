@@ -16,6 +16,9 @@ import com.p2f4.med_office.entity.User;
 import com.p2f4.med_office.security.CustomAuthenticationProvider;
 import com.p2f4.med_office.utils.UserNotFoundException;
 
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
+
 @Configuration
 public class ApiConfiguration {
     private static final String COMMON_PATH = "/api";
@@ -60,6 +63,14 @@ public class ApiConfiguration {
     @Bean
     public PasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();
+    }
+    @Bean
+    public OpenAPI customOpenAPI() {
+        return new OpenAPI()
+        .info(new Info()
+        .title("API de CITASalud para Gestión de Consultorios Médicos ")
+        .version("1.0")
+        .description("Documentación de la API de CITASalud para la gestión de consultorios médicos, especialidades, clínicas y cronogramas."));
     }
     
 }
